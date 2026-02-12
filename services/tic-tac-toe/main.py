@@ -1,6 +1,8 @@
 """FastAPI backend for the tic-tac-toe game."""
 
-from fastapi import FastAPI, HTTPException
+import asyncio
+
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -13,7 +15,7 @@ try:
 except ImportError:
     pass
 
-from game_manager import TicTacToeGameManager
+from game_manager import TicTacToeGameManager, ws_manager
 
 app = FastAPI(
     title="Tic-Tac-Toe API",
@@ -70,6 +72,7 @@ async def root():
             "POST /games/{game_id}/auto": "Play entire game automatically",
             "POST /games/{game_id}/reset": "Reset a game",
             "DELETE /games/{game_id}": "Delete a game",
+            "WS /ws/games/{game_id}": "WebSocket for real-time game updates",
         },
     }
 
@@ -136,12 +139,20 @@ async def make_move(game_id: str, move: MoveRequest):
 
 @app.post("/games/{game_id}/auto")
 async def play_auto(game_id: str):
-    """Play the entire game automatically."""
+    """Play the entire game automatically with real-time WebSocket events."""
     game = manager.get_game(game_id)
     if game is None:
         raise HTTPException(status_code=404, detail="Game not found")
-    result = await manager.run_game(game_id)
-    return {"game_id": game_id, **result}
+
+    # Start game in background so WebSocket clients get real-time updates
+    task = asyncio.create_task(manager.run_game(game_id))
+    game._auto_task = task
+
+    return {
+        "game_id": game_id,
+        "message": "Auto-play started. Connect to WebSocket for real-time updates.",
+        "ws_url": f"/ws/games/{game_id}",
+    }
 
 
 @app.post("/games/{game_id}/reset")
@@ -229,6 +240,55 @@ export interface MoveRequest {{
         "typescript": typescript_schema.format(timestamp=datetime.now().isoformat()),
         "note": "For complete schema, use OpenAPI tools to generate from /openapi.json",
     }
+
+
+@app.websocket("/ws/games/{game_id}")
+async def game_websocket(websocket: WebSocket, game_id: str):
+    """WebSocket endpoint for real-time game updates.
+
+    Events:
+    - game_started: When game begins with player configs
+    - move_made: After each move (board state, player, position, reasoning)
+    - game_ended: When a winner is determined or draw
+    """
+    game = manager.get_game(game_id)
+    if game is None:
+        await websocket.close(code=1008, reason="Game not found")
+        return
+
+    await ws_manager.connect(game_id, websocket)
+
+    try:
+        # Send current game state
+        await websocket.send_json({
+            "event_type": "connected",
+            "data": {
+                "game_id": game_id,
+                "state": game.get_state(),
+                "player_x": {
+                    "type": game.player_x.get_player_type(),
+                    "model": game.player_x.get_model_name(),
+                    "name": game.player_x.name,
+                },
+                "player_o": {
+                    "type": game.player_o.get_player_type(),
+                    "model": game.player_o.get_model_name(),
+                    "name": game.player_o.name,
+                },
+            },
+        })
+
+        # Send any buffered events
+        await ws_manager.send_buffered_events(game_id, websocket)
+
+        # Keep connection alive
+        while True:
+            await websocket.receive_text()
+
+    except WebSocketDisconnect:
+        ws_manager.disconnect(game_id, websocket)
+    except Exception:
+        ws_manager.disconnect(game_id, websocket)
 
 
 if __name__ == "__main__":

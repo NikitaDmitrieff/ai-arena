@@ -1,97 +1,21 @@
-## Monorepo Consolidation Progress
+Monorepo Consolidation & UI Polish — Progress Tracker
+=====================================================
 
-### Completed Tasks
+COMPLETED TASKS:
+- Task 1: Initialize Monorepo Structure — Done (commit b90c5d0)
+- Task 2: Extract Shared Python Core Library — Done (commit 42a6758)
+- Task 3: Refactor Tic-Tac-Toe Backend to Use Shared Core — Done (commit 6b0e165)
+- Task 4: Refactor Mr. White Backend to Use Shared Core — Done (commit aaf3148)
+- Task 5: Refactor Codenames Backend to Use Shared Core — Done (commit f367637)
+- Task 6: Add WebSocket Support to Tic-Tac-Toe Backend — Done (commit 8ec254c)
+- Task 7: Create Unified API Gateway — Done (commit 260fd00)
+- Task 8: Refactor Frontend API Clients to Use Gateway — Done (commit b0ba1e4)
+- Task 9: Update Tic-Tac-Toe Frontend for WebSocket Support — Done (commit 57b4773)
+- Task 10: Convert Mr. White UI to Pixel-Art Design System — Done (commit aaed0dd)
+  Summary: Replaced dark zinc theme with pixel-art classes across all Mr. White
+  components (GameInfo, PlayerList, MessageFeed, VoteResults, GameControls,
+  ModelSelector, page.tsx). Slimmed mrwhite-canvas.css to canvas-only styles.
+  All mrwhite-* component classes removed; now uses pixel-* classes from shared
+  design system. Canvas component (MrWhiteCanvas) kept intact.
 
-**Task 1: Initialize Monorepo Structure** - DONE
-- Initialized git repo at ai-arena/ai-arena/
-- Created directory skeleton: apps/, services/, packages/arena-core/arena_core/
-- Copied frontend from ai-arena-front -> apps/frontend/
-- Copied backends: tic-tac-toe, mr-white, codenames -> services/
-- Copied .prodman/ and .artefacts/ into monorepo root
-- Created root CLAUDE.md
-- Commit: b90c5d0
-
-**Task 2: Extract Shared Python Core Library** - DONE
-- Created packages/arena-core/pyproject.toml
-- Extracted WebSocketManager (unified from mr-white + codenames patterns)
-- Extracted base GameManager (abstract class with game lifecycle)
-- Extracted shared models: GameStatus, GameState, WebSocketEvent
-- Extracted config utilities: load_env
-- Commit: 42a6758
-
-**Task 3: Refactor Tic-Tac-Toe Backend to Use Shared Core** - DONE
-- Added arena-core as local dependency in requirements.txt
-- Created services/tic-tac-toe/game_manager.py with TicTacToeGameManager extending base GameManager
-- Refactored main.py: replaced raw dict storage with TicTacToeGameManager
-- All existing REST endpoints preserved (create, get, move, auto, reset, delete, list)
-- Game-specific logic (game.py, board.py, player.py, prompts.py) untouched
-- No issues encountered
-
-**Task 4: Refactor Mr. White Backend to Use Shared Core** - DONE
-- Replaced custom WebSocketManager with arena-core import (api/websocket_manager.py)
-- Renamed GameManager → MrWhiteGameManager extending arena-core base GameManager
-- Renamed GameState → MrWhiteGameState (mr-white-specific)
-- Updated api/models.py to use GameStatus from arena-core instead of local enum
-- Updated api/routes.py: removed await from sync get_game/list_games calls
-- Added arena-core dependency to pyproject.toml
-- All mr-white-specific game execution logic preserved
-- Commit: aaf3148
-
-**Task 5: Refactor Codenames Backend to Use Shared Core** - DONE
-- Replaced custom WebSocketManager (137 lines) with arena-core re-export (6 lines)
-- Renamed GameManager → CodenamesGameManager extending arena-core base GameManager
-- Updated app.py: imports CodenamesGameManager, uses ws_manager from arena-core
-- create_game is now async (matching base class signature), call site uses await
-- Changed emit_event → send_event to match arena-core API
-- Added arena-core dependency to requirements.txt and pyproject.toml
-- All codenames-specific game logic preserved (word loading, agent configs, match execution)
-- No issues encountered
-- Commit: f367637
-
-**Task 6: Add WebSocket Support to Tic-Tac-Toe Backend** - DONE
-- Added WebSocket endpoint at /ws/games/{game_id} in main.py
-- Imported WebSocketManager from arena-core in game_manager.py
-- run_game() now emits game_started, move_made, game_ended events via event queue/callback pattern
-- Auto-play endpoint runs game in background for real-time WS delivery
-- Added websockets>=12.0 to requirements.txt
-- All existing REST endpoints remain backward compatible
-- Commit: 8ec254c
-
-**Task 7: Create Unified API Gateway** - DONE
-- Created services/gateway/main.py: FastAPI reverse proxy with httpx for REST and websockets for WS
-- REST routing: /api/{service}/* proxied to appropriate backend with path prefix mapping
-- WebSocket routing: /ws/{service}/* proxied to backend WS endpoints
-- Aggregate /health endpoint checks all three game services
-- /api/models proxied to codenames (shared LLM providers)
-- CORS enabled for frontend
-- Created requirements.txt (fastapi, uvicorn, httpx, websockets, python-dotenv)
-- Created Dockerfile (Python 3.12 slim, uvicorn on port 8080)
-- Service URL mapping handles mr-white /api/v1 prefix and codenames /api prefix
-- No issues encountered
-- Commit: 260fd00
-
-**Task 8: Refactor Frontend API Clients to Use Gateway** - DONE
-- Replaced 3 separate env vars with single NEXT_PUBLIC_API_URL (gateway at port 8080)
-- tictactoeApi.ts: base URL → /api/tic-tac-toe, added WebSocket client (getWebSocketUrl, createWebSocket)
-- mrwhiteApi.ts: base URL → /api/mr-white, WS URL → /ws/mr-white/games/{id}/ws, dropped /api/v1 prefix from paths
-- codenamesApi.ts: base URL → /api/codenames, WS URL → /ws/codenames/games/{id}, dropped /api prefix from paths
-- Updated page.tsx files (tic-tac-toe, mr-white, codenames) to show gateway URLs
-- Simplified Dockerfile: single NEXT_PUBLIC_API_URL ARG/ENV
-- Simplified next.config.js: single env var
-- Created apps/frontend/.env.example with gateway URL
-- No issues encountered
-- Commit: b0ba1e4
-
-**Task 9: Update Tic-Tac-Toe Frontend for WebSocket Support** - DONE
-- Refactored useTicTacToe hook: connects WebSocket on game creation for real-time updates
-- Auto-play now uses backend /auto endpoint + WebSocket events (no polling loop)
-- Added connection status indicator (Live/Disconnected) to game page
-- Removed move delay selector (server-driven play, no client-side delay needed)
-- GameBoard already has spring animations that fire on WS-driven state changes
-- GameControls simplified: onPlayAuto no longer takes delayMs parameter
-- Follows same WebSocket patterns as useMrWhite and useCodenames hooks
-- No issues encountered
-- Commit: 57b4773
-
-### Next Task
-Task 10: Convert Mr. White UI to Pixel-Art Design System
+NEXT TASK: Task 11 — Fix Shared UI Components (Button.tsx, StartRandomButton.tsx, Header.tsx)

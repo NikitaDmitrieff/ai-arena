@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Google Fonts - Sora for pixel-art UI */
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;700;800&display=swap");
+
+/* Shared Pixel-Art Stylesheet */
+@import "./pixel-art.css";
+
+::root {
+  --accent: #4ecdc4;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: "Sora", sans-serif;
+  background: #faf6f0;
+  color: #000;
+  min-height: 100vh;
+  padding: 40px;
+  transition: padding-right 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(78, 205, 196, 0.3);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Sora", sans-serif;
+  font-weight: 800;
+  color: #000;
+}
+
+.pixel-art {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.btn-reset {
+  appearance: none;
+  outline: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.card {
+  border: 3px solid #000;
+  border-radius: 0;
+  background: white;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 1);
+}
+
+.container-padded {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}

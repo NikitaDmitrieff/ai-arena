@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Documentation
+*.md
+!README.md
+
+# Test files
+tests/
+test_*.py
+*_test.py
+
+# Results and logs
+results/
+*.log
+
+# UV lock file
+uv.lock
+
+# Local config
+.env
+.env.local
+
+# Example files
+example_client.py
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+

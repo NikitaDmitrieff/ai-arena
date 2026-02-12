@@ -1,0 +1,51 @@
+# Epic: Monorepo Consolidation & UI Polish
+id: EP-ND-001
+title: Monorepo Consolidation & UI Polish
+status: planned
+priority: p0
+owner: ND
+milestone: null
+spec: SPEC-ND-001
+
+description: |
+  Consolidate the four AI Arena repositories (frontend + 3 game backends) into a single
+  monorepo with a shared Python core library, unified API gateway, and consistent
+  neo-brutalist pixel-art UI across all games. Add WebSocket support to tic-tac-toe,
+  create a unified docker-compose for local development, and visually audit every page
+  via Chrome MCP to ensure design consistency.
+
+technical_scope:
+  frontend:
+    - Move Next.js app into apps/frontend/
+    - Refactor API clients to hit single gateway instead of 3 separate backends
+    - Convert Mr. White components from dark theme to pixel-art design system
+    - Fix Button component and Header to use pixel-art classes
+    - General animation and polish consistency pass
+  backend:
+    - Extract shared core library (WebSocket manager, game manager, base models, LLM integration)
+    - Refactor all 3 game backends to use shared core
+    - Add WebSocket support to tic-tac-toe backend
+    - Create unified FastAPI gateway with route-based game dispatch
+    - Unified docker-compose.yml at monorepo root
+
+acceptance_criteria:
+  structure:
+    - All code lives in a single monorepo with clear directory layout
+    - Shared Python package is importable by all game services
+    - Single docker-compose spins up all services locally
+  functionality:
+    - All 3 games work end-to-end (create game, play, view results)
+    - Tic-tac-toe has real-time WebSocket updates like other games
+    - Frontend talks to a single API gateway URL
+  visual:
+    - Mr. White uses the same pixel-art design system as other games
+    - Button component and Header use pixel-btn classes
+    - Consistent animations and transitions across all game pages
+    - Verified visually via Chrome MCP browsing
+
+dependencies: []
+issues: []
+labels: [monorepo, ui-polish, infrastructure]
+target_date: null
+created_at: "2025-02-11"
+updated_at: "2025-02-11"

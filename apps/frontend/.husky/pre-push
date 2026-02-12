@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Lightweight: Just run TypeScript check
+echo "🔍 Checking TypeScript..."
+npm run typecheck --silent
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ TypeScript errors found. Fix them or use 'git push --no-verify' to skip."
+  exit 1
+fi
+
+echo "✅ TypeScript OK"
+

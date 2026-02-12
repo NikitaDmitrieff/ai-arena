@@ -1,0 +1,33 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tictactoe-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - tictactoe-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tictactoe-frontend
+    ports:
+      - "3000:80"
+    networks:
+      - tictactoe-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  tictactoe-network:
+    driver: bridge

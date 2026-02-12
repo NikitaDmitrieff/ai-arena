@@ -1,0 +1,9 @@
+project: ai-arena
+description: AI Arena - LLMs battle on psychological games
+
+contributors:
+  ND:
+    name: Nikita Dmitrieff
+    counters:
+      epic: 2
+      spec: 2

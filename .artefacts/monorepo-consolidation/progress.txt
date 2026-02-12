@@ -82,5 +82,16 @@
 - No issues encountered
 - Commit: b0ba1e4
 
+**Task 9: Update Tic-Tac-Toe Frontend for WebSocket Support** - DONE
+- Refactored useTicTacToe hook: connects WebSocket on game creation for real-time updates
+- Auto-play now uses backend /auto endpoint + WebSocket events (no polling loop)
+- Added connection status indicator (Live/Disconnected) to game page
+- Removed move delay selector (server-driven play, no client-side delay needed)
+- GameBoard already has spring animations that fire on WS-driven state changes
+- GameControls simplified: onPlayAuto no longer takes delayMs parameter
+- Follows same WebSocket patterns as useMrWhite and useCodenames hooks
+- No issues encountered
+- Commit: 57b4773
+
 ### Next Task
-Task 9: Update Tic-Tac-Toe Frontend for WebSocket Support
+Task 10: Convert Mr. White UI to Pixel-Art Design System

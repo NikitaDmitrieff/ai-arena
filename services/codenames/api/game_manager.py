@@ -115,7 +115,7 @@ class CodenamesGameManager(BaseGameManager):
             instance.match._event_callback = instance.event_callback
 
         # Run game in executor (blocking operation)
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         winner = await loop.run_in_executor(None, instance.match.play)
 
         return winner.name if winner else None

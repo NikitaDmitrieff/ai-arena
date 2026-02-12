@@ -34,7 +34,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
       errorData = { detail: response.statusText };
     }
     throw new TicTacToeApiError(
-      errorData.detail || errorData.message || `HTTP ${response.status}`,
+      errorData["detail"] || errorData["message"] || `HTTP ${response.status}`,
       response.status,
       errorData
     );

@@ -22,7 +22,6 @@ export function ModelSelector({
 
   const handleAddModel = () => {
     if (selectedModels.length >= maxModels) return;
-
     const newModel: ModelConfig = { provider, model };
     onModelsChange([...selectedModels, newModel]);
   };
@@ -42,30 +41,21 @@ export function ModelSelector({
   const hasEnough = selectedModels.length >= minModels;
 
   return (
-    <div className="space-y-6" style={{ fontFamily: "'Sora', sans-serif" }}>
+    <div className="space-y-6">
       {/* Model Selection */}
-      <div className="mrwhite-panel-card">
-        <h3 style={{ fontSize: "20px", fontWeight: 800 }}>🎮 Add Player Models</h3>
+      <div className="pixel-card">
+        <h3 className="pixel-heading pixel-heading-sm mb-4">Add Player Models</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           {/* Provider Selection */}
           <div>
-            <label className="block text-sm font-bold mb-2" style={{ color: "#000" }}>
+            <label className="block text-sm pixel-text mb-2" style={{ fontWeight: 700 }}>
               Provider
             </label>
             <select
               value={provider}
               onChange={(e) => handleProviderChange(e.target.value as Provider)}
-              className="w-full"
-              style={{
-                padding: "8px",
-                border: "3px solid #000",
-                borderRadius: "0",
-                fontSize: "14px",
-                background: "white",
-                fontFamily: "'Sora', sans-serif",
-                fontWeight: 600,
-              }}
+              className="pixel-select"
             >
               <option value="openai">OpenAI</option>
               <option value="mistral">Mistral AI</option>
@@ -74,22 +64,13 @@ export function ModelSelector({
 
           {/* Model Selection */}
           <div>
-            <label className="block text-sm font-bold mb-2" style={{ color: "#000" }}>
+            <label className="block text-sm pixel-text mb-2" style={{ fontWeight: 700 }}>
               Model
             </label>
             <select
               value={model}
               onChange={(e) => setModel(e.target.value)}
-              className="w-full"
-              style={{
-                padding: "8px",
-                border: "3px solid #000",
-                borderRadius: "0",
-                fontSize: "14px",
-                background: "white",
-                fontFamily: "'Sora', sans-serif",
-                fontWeight: 600,
-              }}
+              className="pixel-select"
             >
               {currentModels.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -103,39 +84,27 @@ export function ModelSelector({
         <button
           onClick={handleAddModel}
           disabled={!canAddMore}
-          className="mrwhite-btn w-full"
-          style={{
-            opacity: !canAddMore ? 0.5 : 1,
-            cursor: !canAddMore ? "not-allowed" : "pointer",
-          }}
+          className="w-full pixel-btn"
         >
-          {canAddMore ? "➕ Add Model" : `Maximum ${maxModels} Players`}
+          {canAddMore ? "Add Model" : `Maximum ${maxModels} Players`}
         </button>
       </div>
 
       {/* Selected Models List */}
-      <div className="mrwhite-panel-card">
+      <div className="pixel-card">
         <div className="flex justify-between items-center mb-4">
-          <h3 style={{ fontSize: "20px", fontWeight: 800, margin: 0 }}>
-            👥 Selected Players ({selectedModels.length}/{maxModels})
+          <h3 className="pixel-heading pixel-heading-sm" style={{ margin: 0 }}>
+            Selected Players ({selectedModels.length}/{maxModels})
           </h3>
           {!hasEnough && (
-            <span
-              className="text-sm font-bold"
-              style={{
-                color: "#FF6B6B",
-                background: "#FFD93D",
-                padding: "4px 8px",
-                border: "2px solid #000",
-              }}
-            >
-              Minimum {minModels} players required
+            <span className="pixel-badge pixel-badge-warning">
+              Min {minModels} players
             </span>
           )}
         </div>
 
         {selectedModels.length === 0 ? (
-          <p style={{ color: "#666", textAlign: "center", padding: "32px 0" }}>
+          <p className="pixel-text text-center py-8" style={{ opacity: 0.5 }}>
             No models selected. Add at least {minModels} players to start.
           </p>
         ) : (
@@ -147,27 +116,40 @@ export function ModelSelector({
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
-                  className="mrwhite-player-item"
+                  className="pixel-panel flex items-center justify-between"
                 >
-                  <div className="mrwhite-player-info">
-                    <div className={`mrwhite-player-avatar ${m.provider}`}>
+                  <div className="flex items-center gap-3">
+                    <div
+                      style={{
+                        width: "36px",
+                        height: "36px",
+                        border: "2px solid #000",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: "bold",
+                        fontSize: "16px",
+                        color: "#fff",
+                        background: m.provider === "openai" ? "#4ECDC4" : "#FF6B6B",
+                      }}
+                    >
                       {m.provider === "openai" ? "O" : "M"}
                     </div>
                     <div>
-                      <p className="mrwhite-player-name">{m.model}</p>
-                      <p className="mrwhite-player-model capitalize">{m.provider}</p>
+                      <p className="pixel-text text-sm" style={{ fontWeight: 700 }}>
+                        {m.model}
+                      </p>
+                      <p className="pixel-text text-xs capitalize" style={{ opacity: 0.6 }}>
+                        {m.provider}
+                      </p>
                     </div>
                   </div>
                   <button
                     onClick={() => handleRemoveModel(index)}
-                    className="mrwhite-btn danger"
-                    style={{
-                      width: "auto",
-                      padding: "6px 12px",
-                      fontSize: "12px",
-                    }}
+                    className="pixel-btn pixel-btn-danger pixel-btn-sm"
                   >
-                    ✕ Remove
+                    Remove
                   </button>
                 </motion.div>
               ))}

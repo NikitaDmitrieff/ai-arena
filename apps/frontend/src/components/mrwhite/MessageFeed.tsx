@@ -8,90 +8,99 @@ interface MessageFeedProps {
   messages: GameMessage[];
 }
 
-const messageIcons = {
-  clue: "💡",
-  discussion: "💬",
-  vote: "🗳️",
-};
-
-const messageColors = {
-  clue: "border-l-green-500 bg-green-900/10",
-  discussion: "border-l-yellow-500 bg-yellow-900/10",
-  vote: "border-l-red-500 bg-red-900/10",
+const messageColors: Record<string, { border: string; bg: string }> = {
+  clue: { border: "#A8E6CF", bg: "#e8f5e9" },
+  discussion: { border: "#FFD93D", bg: "#fff9e6" },
+  vote: { border: "#FF6B6B", bg: "#ffebee" },
 };
 
 export function MessageFeed({ messages }: MessageFeedProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-      <h3 className="text-xl font-semibold text-white mb-4">Game Feed</h3>
+    <div className="pixel-card">
+      <h3 className="pixel-heading pixel-heading-sm mb-4">Game Feed</h3>
 
-      <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 pixel-scrollbar">
         {messages.length === 0 ? (
-          <p className="text-zinc-500 text-center py-8">
+          <p className="pixel-text text-center py-8" style={{ opacity: 0.5 }}>
             No messages yet. Waiting for game to start...
           </p>
         ) : (
           <AnimatePresence>
-            {messages.map((message, index) => (
-              <motion.div
-                key={`${message.player}-${message.timestamp}-${index}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className={`border-l-4 rounded-lg p-4 ${messageColors[message.type]}`}
-              >
-                {/* Message Header */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{messageIcons[message.type]}</span>
-                    <span className="text-white font-semibold">{message.player}</span>
-                    <span className="text-xs bg-zinc-800 px-2 py-1 rounded text-zinc-400 capitalize">
-                      {message.type}
+            {messages.map((message, index) => {
+              const colors = messageColors[message.type] || {
+                border: "#000",
+                bg: "#f9f9f9",
+              };
+              return (
+                <motion.div
+                  key={`${message.player}-${message.timestamp}-${index}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="pixel-panel"
+                  style={{
+                    borderLeft: `4px solid ${colors.border}`,
+                    background: colors.bg,
+                  }}
+                >
+                  {/* Message Header */}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="pixel-text" style={{ fontWeight: 700 }}>
+                        {message.player}
+                      </span>
+                      <span className="pixel-badge pixel-badge-info text-xs capitalize">
+                        {message.type}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs pixel-text" style={{ opacity: 0.6 }}>
+                      <span>Round {message.round}</span>
+                      <span>·</span>
+                      <span>
+                        {new Date(message.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Message Content */}
+                  <p className="pixel-text text-sm leading-relaxed">
+                    {message.content}
+                  </p>
+
+                  {/* Phase Badge */}
+                  <div className="mt-2">
+                    <span className="pixel-badge pixel-badge-warning text-xs capitalize">
+                      {message.phase}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-zinc-500">
-                    <span>Round {message.round}</span>
-                    <span>•</span>
-                    <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
-                  </div>
-                </div>
-
-                {/* Message Content */}
-                <p className="text-zinc-300 leading-relaxed">{message.content}</p>
-
-                {/* Phase Badge */}
-                <div className="mt-2">
-                  <span className="text-xs text-zinc-500 capitalize">Phase: {message.phase}</span>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Custom Scrollbar Styles */}
       <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
+        .pixel-scrollbar::-webkit-scrollbar {
           width: 8px;
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #27272a;
-          border-radius: 4px;
+        .pixel-scrollbar::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border: 2px solid #000;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #52525b;
-          border-radius: 4px;
+        .pixel-scrollbar::-webkit-scrollbar-thumb {
+          background: #4ecdc4;
+          border: 2px solid #000;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #71717a;
+        .pixel-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #3fbdb4;
         }
       `}</style>
     </div>

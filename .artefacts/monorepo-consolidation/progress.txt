@@ -12,18 +12,18 @@ COMPLETED TASKS:
 - Task 8: Refactor Frontend API Clients to Use Gateway — Done (commit b0ba1e4)
 - Task 9: Update Tic-Tac-Toe Frontend for WebSocket Support — Done (commit 57b4773)
 - Task 10: Convert Mr. White UI to Pixel-Art Design System — Done (commit aaed0dd)
-  Summary: Replaced dark zinc theme with pixel-art classes across all Mr. White
-  components (GameInfo, PlayerList, MessageFeed, VoteResults, GameControls,
-  ModelSelector, page.tsx). Slimmed mrwhite-canvas.css to canvas-only styles.
-  All mrwhite-* component classes removed; now uses pixel-* classes from shared
-  design system. Canvas component (MrWhiteCanvas) kept intact.
-
 - Task 11: Fix Shared UI Components — Done (commit a5be369)
-  Summary: Refactored Button.tsx to use pixel-btn CSS classes as base (primary,
-  danger, warning, soft variants mapped to pixel-btn-* modifiers). Added size
-  prop (sm/md/lg) mapping to pixel-btn-sm/pixel-btn-lg. Updated StartRandomButton
-  to use pixel-btn pixel-btn-lg. Updated Header "Play now" button to use pixel-btn
-  pixel-btn-sm. Header container now uses pixel-border-lg for consistent pixel-art
-  styling. Fixed test that referenced non-existent "ghost" variant.
 
-NEXT TASK: Task 12 — Animation and Polish Consistency Pass
+- Task 12: Animation and Polish Consistency Pass — Done (commit 52f793f)
+  Summary: Added consistent Framer Motion patterns across all 3 games:
+  - AnimatePresence mode="wait" for codenames config/game view transitions
+  - Stagger animations on Mr. White player list (index*0.1 delay) and vote results
+  - Stagger animations on tic-tac-toe feature info cards
+  - Reconnect buttons when WebSocket disconnects (all 3 games)
+  - pixel-hover-lift on codenames board unrevealed cards
+  - Loading spinner on codenames board placeholder and delete button
+  - Fixed "Game Events" heading color (was text-white, now pixel-heading)
+  - Fixed missing pixel-btn base class on dismiss/API docs buttons
+  - Added pulse animation to Mr. White connection indicator
+
+NEXT TASK: Task 13 — Create Unified Docker Compose

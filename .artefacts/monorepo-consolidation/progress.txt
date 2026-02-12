@@ -35,4 +35,28 @@ COMPLETED TASKS:
   (installed separately in Dockerfiles). Game services internal-only; only
   frontend (3000) and gateway (8080) exposed.
 
-NEXT TASK: Task 14 — Visual Audit via Chrome MCP
+- Task 14: Visual Audit via Chrome MCP — Done (commit 0db7890)
+  Summary: Performed thorough code-level visual audit of all pages and components.
+  Fixes applied:
+  - Added codenames to home page random game list (was missing from StartRandomButton)
+  - Standardized all connection indicators to use pixel-border class (3px) across all 3 games
+  - Fixed inline <code> elements to use 3px borders (was 2px) for pixel-art consistency
+  - Fixed scrollbar borders in codenames EventLog and mr-white MessageFeed to 3px
+  - Fixed VoteResults progress bar track border to 3px
+  - Removed dead getEventColor function from codenames EventLog (was returning Tailwind classes never used)
+  - Updated games hub grid from 2-col to 3-col to properly display 3 game cards
+  No dark theme remnants found. All pages use cream backgrounds, pixel-art borders, Sora font.
+
+- Task 15: E2E Verification — Done (commit 98ede3e)
+  Summary: Created .artefacts/monorepo-consolidation/TESTING.md with comprehensive
+  manual testing steps covering:
+  - Docker Compose startup and health verification
+  - Gateway routing (REST and WebSocket proxy)
+  - Full game flows for all 3 games (Tic-Tac-Toe, Mr. White, Codenames)
+  - Exact curl commands and expected JSON responses
+  - WebSocket event sequences for each game type
+  - Frontend UI consistency checklist (pixel-art design system)
+  - Edge cases (disconnection, no API keys, concurrent games, service down)
+  - Known limitations documented
+
+NEXT TASK: Task 16 — Publish to GitHub

@@ -1,0 +1,31 @@
+## Monorepo Consolidation Progress
+
+### Completed Tasks
+
+**Task 1: Initialize Monorepo Structure** - DONE
+- Initialized git repo at ai-arena/ai-arena/
+- Created directory skeleton: apps/, services/, packages/arena-core/arena_core/
+- Copied frontend from ai-arena-front -> apps/frontend/
+- Copied backends: tic-tac-toe, mr-white, codenames -> services/
+- Copied .prodman/ and .artefacts/ into monorepo root
+- Created root CLAUDE.md
+- Commit: b90c5d0
+
+**Task 2: Extract Shared Python Core Library** - DONE
+- Created packages/arena-core/pyproject.toml
+- Extracted WebSocketManager (unified from mr-white + codenames patterns)
+- Extracted base GameManager (abstract class with game lifecycle)
+- Extracted shared models: GameStatus, GameState, WebSocketEvent
+- Extracted config utilities: load_env
+- Commit: 42a6758
+
+**Task 3: Refactor Tic-Tac-Toe Backend to Use Shared Core** - DONE
+- Added arena-core as local dependency in requirements.txt
+- Created services/tic-tac-toe/game_manager.py with TicTacToeGameManager extending base GameManager
+- Refactored main.py: replaced raw dict storage with TicTacToeGameManager
+- All existing REST endpoints preserved (create, get, move, auto, reset, delete, list)
+- Game-specific logic (game.py, board.py, player.py, prompts.py) untouched
+- No issues encountered
+
+### Next Task
+Task 4: Refactor Mr. White Backend to Use Shared Core

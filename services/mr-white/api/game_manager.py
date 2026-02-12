@@ -1,23 +1,23 @@
-"""
-Game state manager for concurrent game execution.
-"""
+"""Mr. White game manager using arena-core base."""
 
 import asyncio
 import logging
-import uuid
+import random
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
-from api.models import GamePhase, GameStatus, PlayerInfo
+from arena_core import GameManager, GameStatus
+
+from api.models import GamePhase, PlayerInfo
 from api.websocket_manager import ws_manager
-from src.core.game import MisterWhiteGame, play_single_game
+from src.core.game import MisterWhiteGame
 from src.core.models import GameResult
 
 logger = logging.getLogger(__name__)
 
 
-class GameState:
-    """Represents the state of a single game."""
+class MrWhiteGameState:
+    """Represents the state of a single Mr. White game."""
 
     def __init__(
         self,
@@ -73,12 +73,8 @@ class GameState:
         }
 
 
-class GameManager:
-    """Manages all active and completed games."""
-
-    def __init__(self):
-        self.games: Dict[str, GameState] = {}
-        self._lock = asyncio.Lock()
+class MrWhiteGameManager(GameManager):
+    """Manages Mr. White game lifecycle, extending arena-core base."""
 
     async def create_game(
         self,
@@ -86,10 +82,9 @@ class GameManager:
         verbose: bool = False,
         secret_word: Optional[str] = None,
     ) -> str:
-        """Create a new game and return its ID."""
-        game_id = str(uuid.uuid4())
+        game_id = self.generate_id()
         async with self._lock:
-            game_state = GameState(
+            game_state = MrWhiteGameState(
                 game_id=game_id,
                 models=models,
                 verbose=verbose,
@@ -99,17 +94,8 @@ class GameManager:
         logger.info(f"Created game {game_id} with {len(models)} players")
         return game_id
 
-    async def get_game(self, game_id: str) -> Optional[GameState]:
-        """Get game state by ID."""
-        return self.games.get(game_id)
-
-    async def list_games(self) -> List[GameState]:
-        """List all games."""
-        return list(self.games.values())
-
-    async def run_game(self, game_id: str) -> None:
-        """Execute a game asynchronously with real-time updates."""
-        game_state = await self.get_game(game_id)
+    async def run_game(self, game_id: str) -> Any:
+        game_state = self.get_game(game_id)
         if not game_state:
             logger.error(f"Game {game_id} not found")
             return
@@ -175,18 +161,13 @@ class GameManager:
             )
 
     def _execute_game_with_events(
-        self, game_id: str, game_state: GameState
+        self, game_id: str, game_state: MrWhiteGameState
     ) -> GameResult:
         """Execute game synchronously and send events via WebSocket (runs in executor)."""
-        import random
-
         from src.config import constants
 
-        # Use constants for names and words
         names = constants.NAMES
         words = constants.SECRET_WORD
-
-        # Select secret word
         if game_state.secret_word:
             selected_word = game_state.secret_word
         else:
@@ -468,5 +449,5 @@ class GameManager:
 
 
 # Global game manager instance
-game_manager = GameManager()
+game_manager = MrWhiteGameManager()
 

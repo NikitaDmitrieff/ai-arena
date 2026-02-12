@@ -52,7 +52,7 @@ async def create_game(
         background_tasks.add_task(game_manager.run_game, game_id)
 
         # Get initial game state
-        game_state = await game_manager.get_game(game_id)
+        game_state = game_manager.get_game(game_id)
         return GameResponse(**game_state.to_dict())
 
     except Exception as e:
@@ -63,7 +63,7 @@ async def create_game(
 @router.get("/games/{game_id}", response_model=GameResponse)
 async def get_game(game_id: str):
     """Get game status and details."""
-    game_state = await game_manager.get_game(game_id)
+    game_state = game_manager.get_game(game_id)
     if not game_state:
         raise HTTPException(status_code=404, detail="Game not found")
 
@@ -73,8 +73,12 @@ async def get_game(game_id: str):
 @router.get("/games", response_model=GameListResponse)
 async def list_games():
     """List all games."""
-    games = await game_manager.list_games()
-    game_responses = [GameResponse(**g.to_dict()) for g in games]
+    game_ids = game_manager.list_games()
+    game_responses = [
+        GameResponse(**game_manager.get_game(gid).to_dict())
+        for gid in game_ids
+        if game_manager.get_game(gid) is not None
+    ]
     return GameListResponse(games=game_responses, total=len(game_responses))
 
 
@@ -90,7 +94,7 @@ async def game_websocket(websocket: WebSocket, game_id: str):
     - error: Error messages
     """
     # Check if game exists
-    game_state = await game_manager.get_game(game_id)
+    game_state = game_manager.get_game(game_id)
     if not game_state:
         await websocket.close(code=1008, reason="Game not found")
         return

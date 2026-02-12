@@ -8,21 +8,14 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+from arena_core import GameStatus
+
 
 class ModelConfig(BaseModel):
     """LLM model configuration."""
 
     provider: str = Field(..., description="Provider name (openai, mistral)")
     model: str = Field(..., description="Model identifier")
-
-
-class GameStatus(str, Enum):
-    """Game status enumeration."""
-
-    PENDING = "pending"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
 
 
 class GamePhase(str, Enum):

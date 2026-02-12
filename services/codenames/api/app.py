@@ -18,7 +18,7 @@ if str(SRC) not in sys.path:
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.game_manager import GameManager
+from api.game_manager import CodenamesGameManager
 from api.models import (
     BoardCard,
     ErrorResponse,
@@ -28,22 +28,20 @@ from api.models import (
     GameStatus,
     ModelInfo,
 )
-from api.websocket_manager import WebSocketManager
+from api.websocket_manager import ws_manager
 from codenames.models import Phase
 
 # Initialize managers
 WORD_LIST_PATH = ROOT / "words.txt"
 
-game_manager: GameManager
-ws_manager: WebSocketManager
+game_manager: CodenamesGameManager
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup/shutdown."""
-    global game_manager, ws_manager
-    game_manager = GameManager(WORD_LIST_PATH)
-    ws_manager = WebSocketManager()
+    global game_manager
+    game_manager = CodenamesGameManager(WORD_LIST_PATH)
     yield
     # Cleanup on shutdown
     for game_id in list(game_manager.games.keys()):
@@ -93,7 +91,7 @@ async def list_models():
         config = json.loads(config_path.read_text())
         models = config.get("all_available_models", [])
         return [ModelInfo(**m) for m in models]
-    
+
     # Fallback to basic models
     return [
         ModelInfo(provider="openai", model="gpt-4o"),
@@ -114,35 +112,35 @@ async def start_game(request: GameStartRequest):
             "blue_spymaster": request.blue_spymaster.model_dump(),
             "blue_operative": request.blue_operative.model_dump(),
         }
-        
+
         # Create the game
-        game_id = game_manager.create_game(
+        game_id = await game_manager.create_game(
             agent_configs=agent_configs,
             seed=request.seed,
         )
-        
+
         # Create event queue for this game BEFORE starting the game
         ws_manager.create_game_queue(game_id)
-        
+
         # Set up event callback after game creation
         instance = game_manager.get_game(game_id)
         if instance:
             event_callback = ws_manager.create_event_callback(game_id)
             instance.event_callback = event_callback
-        
+
         # Start the game in the background
         async def run_game_with_events():
             """Run game and process events concurrently."""
             # Emit initial game state
             await emit_initial_state(game_id)
-            
+
             # Run game and process events concurrently
             game_task = asyncio.create_task(game_manager.run_game(game_id))
             events_task = asyncio.create_task(ws_manager.process_events(game_id))
-            
+
             # Wait for game to complete
             await game_task
-            
+
             # Give events a moment to finish
             await asyncio.sleep(0.5)
             events_task.cancel()
@@ -150,14 +148,14 @@ async def start_game(request: GameStartRequest):
                 await events_task
             except asyncio.CancelledError:
                 pass
-        
+
         # Create background task
         task = asyncio.create_task(run_game_with_events())
         instance.task = task
-        
+
         # Return initial status
         return get_game_status(game_id)
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -174,9 +172,9 @@ async def get_game_state(game_id: str):
     instance = game_manager.get_game(game_id)
     if not instance:
         raise HTTPException(status_code=404, detail="Game not found")
-    
+
     game = instance.game
-    
+
     # Build board representation (operative view - no hidden card types)
     board = []
     for row in game.board.cards:
@@ -188,10 +186,10 @@ async def get_game_state(game_id: str):
                 card_type=card.card_type.name if card.revealed else None
             ))
         board.append(board_row)
-    
+
     # Get status
     status = get_game_status(game_id)
-    
+
     # Get last clue
     last_clue = None
     if game.last_clue:
@@ -199,7 +197,7 @@ async def get_game_state(game_id: str):
             "word": game.last_clue.word,
             "number": game.last_clue.number
         }
-    
+
     return GameStateResponse(
         game_id=game_id,
         status=status,
@@ -224,16 +222,16 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
     if not instance:
         await websocket.close(code=1008, reason="Game not found")
         return
-    
+
     await ws_manager.connect(game_id, websocket)
-    
+
     try:
         # Send initial state first
         await send_initial_state(websocket, game_id)
-        
+
         # Then send any buffered events (events that occurred before connection)
         await ws_manager.send_buffered_events(game_id, websocket)
-        
+
         # Keep connection alive and listen for close
         while True:
             try:
@@ -254,16 +252,16 @@ def get_game_status(game_id: str) -> GameStatus:
     instance = game_manager.get_game(game_id)
     if not instance:
         raise HTTPException(status_code=404, detail="Game not found")
-    
+
     game = instance.game
-    
+
     # Map phase
     phase_map = {
         Phase.AWAIT_CLUE: GamePhase.AWAIT_CLUE,
         Phase.AWAIT_GUESS: GamePhase.AWAIT_GUESS,
         Phase.FINISHED: GamePhase.FINISHED,
     }
-    
+
     return GameStatus(
         game_id=game_id,
         phase=phase_map[game.phase],
@@ -281,9 +279,9 @@ async def emit_initial_state(game_id: str):
     instance = game_manager.get_game(game_id)
     if not instance:
         return
-    
+
     game = instance.game
-    
+
     # Build board for initial state
     board_data = []
     for row in game.board.cards:
@@ -295,8 +293,8 @@ async def emit_initial_state(game_id: str):
                 "card_type": card.card_type.name if card.revealed else None
             })
         board_data.append(row_data)
-    
-    await ws_manager.emit_event(game_id, "game_started", {
+
+    await ws_manager.send_event(game_id, "game_started", {
         "game_id": game_id,
         "starting_team": game.starting_team.name,
         "board": board_data,
@@ -310,9 +308,9 @@ async def send_initial_state(websocket: WebSocket, game_id: str):
     instance = game_manager.get_game(game_id)
     if not instance:
         return
-    
+
     game = instance.game
-    
+
     # Build board
     board_data = []
     for row in game.board.cards:
@@ -324,7 +322,7 @@ async def send_initial_state(websocket: WebSocket, game_id: str):
                 "card_type": card.card_type.name if card.revealed else None
             })
         board_data.append(row_data)
-    
+
     message = {
         "event_type": "game_state",
         "data": {
@@ -339,6 +337,5 @@ async def send_initial_state(websocket: WebSocket, game_id: str):
             "assassin_revealed": game.assassin_revealed
         }
     }
-    
-    await websocket.send_text(json.dumps(message))
 
+    await websocket.send_text(json.dumps(message))

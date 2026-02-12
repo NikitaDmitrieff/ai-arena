@@ -10,4 +10,5 @@ dependencies = [
     "uvicorn>=0.32.0",
     "websockets>=13.0",
     "pydantic>=2.0.0",
+    "arena-core",
 ]

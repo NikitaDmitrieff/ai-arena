@@ -97,7 +97,7 @@ export default function CodenamesPage() {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">⚠️</span>
+                  <span className="text-xl">⚠️</span>
                   <div>
                     <p className="pixel-text" style={{ fontWeight: 700 }}>
                       Error
@@ -105,7 +105,7 @@ export default function CodenamesPage() {
                     <p className="text-sm pixel-text">{error}</p>
                   </div>
                 </div>
-                <button onClick={clearError} className="pixel-btn-sm pixel-btn-danger">
+                <button onClick={clearError} className="pixel-btn pixel-btn-sm pixel-btn-danger">
                   ✕
                 </button>
               </div>
@@ -115,17 +115,31 @@ export default function CodenamesPage() {
 
         {/* Main Content */}
         <div className="space-y-8">
+          <AnimatePresence mode="wait">
           {!gameId ? (
             /* Configuration Form */
+            <motion.div
+              key="config"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
             <PlayerConfigForm
               availableModels={availableModels}
               onStartGame={handleStartGame}
               isLoading={isLoading}
               onFetchModels={fetchModels}
             />
+            </motion.div>
           ) : (
             /* Game View */
-            <>
+            <motion.div
+              key="game"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-8"
+            >
               {/* Game Info */}
               <GameInfo
                 gameId={gameId}
@@ -158,11 +172,12 @@ export default function CodenamesPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full max-w-5xl mx-auto"
               >
-                <h2 className="text-2xl font-bold mb-4 text-white">Game Events</h2>
+                <h2 className="pixel-heading pixel-heading-md mb-4">Game Events</h2>
                 <EventLog events={events} maxHeight="500px" />
               </motion.div>
-            </>
+            </motion.div>
           )}
+          </AnimatePresence>
         </div>
 
         {/* Game Rules */}

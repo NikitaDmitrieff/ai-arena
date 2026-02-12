@@ -37,7 +37,12 @@ export function GameControls({
       </button>
 
       <button onClick={onDeleteGame} disabled={isLoading} className="pixel-btn pixel-btn-danger">
-        {winner ? "Close Game" : "Cancel Game"}
+        {isLoading ? (
+          <span className="flex items-center gap-2">
+            <span className="pixel-spinner" />
+            Loading...
+          </span>
+        ) : winner ? "Close Game" : "Cancel Game"}
       </button>
     </motion.div>
   );

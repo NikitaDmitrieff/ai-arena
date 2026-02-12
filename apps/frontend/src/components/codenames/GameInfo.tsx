@@ -47,7 +47,7 @@ export function GameInfo({
     <div className="w-full max-w-5xl mx-auto space-y-4">
       {/* Connection Status */}
       <div className="flex items-center justify-between px-4 py-2 pixel-panel-info">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div
             style={{
               width: "8px",
@@ -58,6 +58,14 @@ export function GameInfo({
             className={isConnected ? "animate-pulse" : ""}
           ></div>
           <span className="text-sm pixel-text">{isConnected ? "Connected" : "Disconnected"}</span>
+          {!isConnected && gameId && (
+            <button
+              onClick={() => window.location.reload()}
+              className="pixel-btn pixel-btn-sm pixel-btn-warning"
+            >
+              Reconnect
+            </button>
+          )}
         </div>
         {gameId && (
           <span className="text-xs pixel-text font-mono" style={{ opacity: 0.7 }}>

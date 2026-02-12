@@ -56,9 +56,12 @@ export function GameBoard({ board }: GameBoardProps) {
   if (!board) {
     return (
       <div className="flex items-center justify-center h-96 pixel-card">
-        <p className="pixel-text" style={{ opacity: 0.7 }}>
-          Waiting for game to start...
-        </p>
+        <div className="text-center space-y-3">
+          <div className="pixel-spinner mx-auto" />
+          <p className="pixel-text" style={{ opacity: 0.7 }}>
+            Waiting for game to start...
+          </p>
+        </div>
       </div>
     );
   }
@@ -72,7 +75,9 @@ export function GameBoard({ board }: GameBoardProps) {
               key={`${rowIndex}-${colIndex}`}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
+              whileHover={!card.revealed ? { x: -2, y: -2 } : {}}
               transition={{ delay: (rowIndex * 5 + colIndex) * 0.02 }}
+              className={!card.revealed ? "pixel-hover-lift" : ""}
               style={{
                 aspectRatio: "1",
                 display: "flex",

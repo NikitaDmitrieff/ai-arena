@@ -105,7 +105,7 @@ export default function TicTacToePage() {
                   <span className="text-xl">⚠️</span>
                   <p>{error}</p>
                 </div>
-                <button onClick={clearError} className="pixel-btn-sm pixel-btn-danger">
+                <button onClick={clearError} className="pixel-btn pixel-btn-sm pixel-btn-danger">
                   ✕
                 </button>
               </div>
@@ -137,7 +137,7 @@ export default function TicTacToePage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center justify-center gap-2"
+              className="flex items-center justify-center gap-3"
             >
               <span
                 className="h-3 w-3 pixel-border"
@@ -149,6 +149,14 @@ export default function TicTacToePage() {
               <span className="pixel-text text-sm">
                 {isConnected ? "Live — WebSocket connected" : "Disconnected"}
               </span>
+              {!isConnected && gameId && (
+                <button
+                  onClick={() => window.location.reload()}
+                  className="pixel-btn pixel-btn-sm pixel-btn-warning"
+                >
+                  Reconnect
+                </button>
+              )}
             </motion.div>
 
             {/* Game Controls */}
@@ -247,7 +255,7 @@ export default function TicTacToePage() {
               }
               target="_blank"
               rel="noopener noreferrer"
-              className="pixel-btn-sm"
+              className="pixel-btn pixel-btn-sm"
             >
               📖 API Docs
             </a>
@@ -255,28 +263,25 @@ export default function TicTacToePage() {
         </motion.div>
 
         {/* Features Info */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="pixel-grid pixel-grid-3"
-        >
-          <div className="pixel-card text-center">
-            <div className="text-3xl mb-2">🤖</div>
-            <h3 className="pixel-heading pixel-heading-sm">LLM vs LLM</h3>
-            <p className="text-sm pixel-text mt-1">Watch AI models battle with reasoning</p>
-          </div>
-          <div className="pixel-card text-center">
-            <div className="text-3xl mb-2">⚡</div>
-            <h3 className="pixel-heading pixel-heading-sm">Real-Time WebSocket</h3>
-            <p className="text-sm pixel-text mt-1">Live updates as each move happens</p>
-          </div>
-          <div className="pixel-card text-center">
-            <div className="text-3xl mb-2">💭</div>
-            <h3 className="pixel-heading pixel-heading-sm">AI Reasoning</h3>
-            <p className="text-sm pixel-text mt-1">View LLM decision-making process</p>
-          </div>
-        </motion.div>
+        <div className="pixel-grid pixel-grid-3">
+          {[
+            { icon: "🤖", title: "LLM vs LLM", desc: "Watch AI models battle with reasoning" },
+            { icon: "⚡", title: "Real-Time WebSocket", desc: "Live updates as each move happens" },
+            { icon: "💭", title: "AI Reasoning", desc: "View LLM decision-making process" },
+          ].map((item, i) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + i * 0.1 }}
+              className="pixel-card text-center pixel-hover-lift"
+            >
+              <div className="text-3xl mb-2">{item.icon}</div>
+              <h3 className="pixel-heading pixel-heading-sm">{item.title}</h3>
+              <p className="text-sm pixel-text mt-1">{item.desc}</p>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   );

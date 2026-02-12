@@ -239,8 +239,18 @@ export default function MrWhitePage() {
                               background: isConnected ? "#A8E6CF" : "#FF6B6B",
                               display: "inline-block",
                             }}
+                            className={isConnected ? "animate-pulse" : ""}
                           />
                           {isConnected ? "Yes" : "No"}
+                          {!isConnected && (
+                            <button
+                              onClick={() => window.location.reload()}
+                              className="pixel-btn pixel-btn-sm pixel-btn-warning ml-2"
+                              style={{ padding: "4px 8px", fontSize: "11px" }}
+                            >
+                              Reconnect
+                            </button>
+                          )}
                         </span>
                       </div>
                     </div>
@@ -251,8 +261,14 @@ export default function MrWhitePage() {
                     <div className="pixel-card">
                       <h3 className="pixel-heading pixel-heading-sm mb-4">Players</h3>
                       <div className="space-y-2">
-                        {game.players.map((player) => (
-                          <div key={player.name} className="pixel-panel flex items-center justify-between">
+                        {game.players.map((player, index) => (
+                          <motion.div
+                            key={player.name}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            className="pixel-panel flex items-center justify-between pixel-hover-lift"
+                          >
                             <div className="flex items-center gap-3">
                               <div
                                 style={{
@@ -296,7 +312,7 @@ export default function MrWhitePage() {
                                 )}
                               </div>
                             )}
-                          </div>
+                          </motion.div>
                         ))}
                       </div>
                     </div>
@@ -309,9 +325,12 @@ export default function MrWhitePage() {
                       <div className="space-y-2">
                         {Object.entries(game.vote_counts)
                           .sort((a, b) => b[1] - a[1])
-                          .map(([player, votes]) => (
-                            <div
+                          .map(([player, votes], index) => (
+                            <motion.div
                               key={player}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
                               className={`pixel-panel flex items-center justify-between ${
                                 player === game.eliminated_player ? "pixel-card-red" : ""
                               }`}
@@ -327,7 +346,7 @@ export default function MrWhitePage() {
                               <span className="pixel-text" style={{ fontWeight: 700 }}>
                                 {votes} votes
                               </span>
-                            </div>
+                            </motion.div>
                           ))}
                       </div>
                     </div>

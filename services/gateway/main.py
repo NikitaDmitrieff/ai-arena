@@ -9,7 +9,8 @@ import logging
 import os
 
 import httpx
-from fastapi import FastAPI, Request, Response, WebSocket, WebSocketDisconnect
+import websockets
+from fastapi import FastAPI, Request, Response, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -20,26 +21,11 @@ TIC_TAC_TOE_URL = os.getenv("TIC_TAC_TOE_URL", "http://tic-tac-toe:8000")
 MR_WHITE_URL = os.getenv("MR_WHITE_URL", "http://mr-white:8001")
 CODENAMES_URL = os.getenv("CODENAMES_URL", "http://codenames:8002")
 
-# Route mapping: gateway prefix -> (backend base URL, backend path prefix)
-# Mr. White backend mounts routes under /api/v1, codenames under /api
+# Route mapping: gateway prefix -> (backend base URL, REST prefix, WS prefix)
 ROUTE_MAP = {
-    "tic-tac-toe": (TIC_TAC_TOE_URL, ""),
-    "mr-white": (MR_WHITE_URL, "/api/v1"),
-    "codenames": (CODENAMES_URL, "/api"),
-}
-
-# WebSocket route mapping: gateway prefix -> backend base URL
-# Tic-tac-toe: /ws/games/{id}, Mr. White: /api/v1/games/{id}/ws, Codenames: /ws/games/{id}
-WS_MAP = {
-    "tic-tac-toe": TIC_TAC_TOE_URL,
-    "mr-white": MR_WHITE_URL,
-    "codenames": CODENAMES_URL,
-}
-
-WS_PATH_MAP = {
-    "tic-tac-toe": lambda path: f"/ws/{path}" if path else "/ws",
-    "mr-white": lambda path: f"/api/v1/{path}" if path else "/api/v1",
-    "codenames": lambda path: f"/ws/{path}" if path else "/ws",
+    "tic-tac-toe": (TIC_TAC_TOE_URL, "", "/ws"),
+    "mr-white": (MR_WHITE_URL, "/api/v1", "/api/v1"),
+    "codenames": (CODENAMES_URL, "/api", "/ws"),
 }
 
 app = FastAPI(title="AI Arena Gateway", version="1.0.0")
@@ -73,8 +59,8 @@ async def shutdown():
 async def health():
     """Aggregate health check across all services."""
     results = {}
-    for name, (url, _prefix) in ROUTE_MAP.items():
-        health_path = "/health" if name == "tic-tac-toe" else f"{_prefix}/health"
+    for name, (url, rest_prefix, _ws_prefix) in ROUTE_MAP.items():
+        health_path = f"{rest_prefix}/health" if rest_prefix else "/health"
         try:
             resp = await http_client.get(f"{url}{health_path}", timeout=5.0)
             results[name] = resp.json() if resp.status_code == 200 else {"status": "unhealthy"}
@@ -103,8 +89,8 @@ async def proxy_rest(service: str, path: str, request: Request):
     if service not in ROUTE_MAP:
         return Response(content='{"detail":"Unknown service"}', status_code=404, media_type="application/json")
 
-    base_url, prefix = ROUTE_MAP[service]
-    target = f"{base_url}{prefix}/{path}"
+    base_url, rest_prefix, _ws_prefix = ROUTE_MAP[service]
+    target = f"{base_url}{rest_prefix}/{path}"
 
     # Forward request
     body = await request.body()
@@ -137,33 +123,32 @@ async def proxy_rest(service: str, path: str, request: Request):
 @app.websocket("/ws/{service}/{path:path}")
 async def proxy_websocket(websocket: WebSocket, service: str, path: str):
     """Proxy WebSocket connections to the appropriate game service."""
-    if service not in WS_MAP:
+    if service not in ROUTE_MAP:
         await websocket.close(code=1008, reason="Unknown service")
         return
 
     await websocket.accept()
 
-    base_url = WS_MAP[service]
-    backend_path = WS_PATH_MAP[service](path)
+    base_url, _rest_prefix, ws_prefix = ROUTE_MAP[service]
+    backend_path = f"{ws_prefix}/{path}" if path else ws_prefix
     ws_url = base_url.replace("http://", "ws://").replace("https://", "wss://")
     target = f"{ws_url}{backend_path}"
 
     try:
-        import websockets
         async with websockets.connect(target) as backend_ws:
             async def forward_to_backend():
                 try:
                     while True:
                         data = await websocket.receive_text()
                         await backend_ws.send(data)
-                except (WebSocketDisconnect, Exception):
+                except Exception:
                     pass
 
             async def forward_to_client():
                 try:
                     async for message in backend_ws:
                         await websocket.send_text(message)
-                except (WebSocketDisconnect, Exception):
+                except Exception:
                     pass
 
             # Run both directions concurrently

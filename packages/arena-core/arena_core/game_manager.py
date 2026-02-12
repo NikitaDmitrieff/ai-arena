@@ -6,10 +6,7 @@ import asyncio
 import logging
 import uuid
 from abc import ABC, abstractmethod
-from datetime import datetime
-from typing import Any, Dict, List, Optional
-
-from arena_core.models import GameStatus
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +21,7 @@ class GameManager(ABC):
     """
 
     def __init__(self):
-        self.games: Dict[str, Any] = {}
+        self.games: dict[str, Any] = {}
         self._lock = asyncio.Lock()
 
     def generate_id(self) -> str:
@@ -40,11 +37,11 @@ class GameManager(ABC):
         game_id = self.generate_id()
         return game_id
 
-    def get_game(self, game_id: str) -> Optional[Any]:
+    def get_game(self, game_id: str) -> Any | None:
         """Get game state by ID."""
         return self.games.get(game_id)
 
-    def list_games(self) -> List[str]:
+    def list_games(self) -> list[str]:
         """List all game IDs."""
         return list(self.games.keys())
 

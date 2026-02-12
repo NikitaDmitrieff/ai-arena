@@ -43,24 +43,15 @@ class TicTacToeGameManager(GameManager):
         ws_manager.create_game_queue(game_id)
         event_callback = ws_manager.create_event_callback(game_id)
 
-        # Emit game_started event
         event_callback("game_started", {
             "game_id": game_id,
-            "player_x": {
-                "type": game.player_x.get_player_type(),
-                "model": game.player_x.get_model_name(),
-                "name": game.player_x.name,
-            },
-            "player_o": {
-                "type": game.player_o.get_player_type(),
-                "model": game.player_o.get_model_name(),
-                "name": game.player_o.name,
-            },
+            "player_x": player_info(game.player_x),
+            "player_o": player_info(game.player_o),
             "board": game.board.get_state(),
         })
 
         # Run game with event emission in executor (game logic is sync)
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         events_task = asyncio.create_task(ws_manager.process_events(game_id))
 
         def play_with_events():
@@ -116,13 +107,24 @@ class TicTacToeGameManager(GameManager):
         return result
 
 
+def player_info(player: Player) -> dict:
+    """Serialize a Player to a dict suitable for API responses and WS events."""
+    return {
+        "type": player.get_player_type(),
+        "model": player.get_model_name(),
+        "name": player.name,
+    }
+
+
+_PLAYER_DEFAULTS = {
+    "use_llm": False,
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "temperature": 0.7,
+}
+
+
 def _build_player(symbol: str, config: Optional[dict]) -> Optional[Player]:
     if config is None:
         return None
-    return Player(
-        symbol=symbol,
-        use_llm=config.get("use_llm", False),
-        provider=config.get("provider", "openai"),
-        model=config.get("model", "gpt-4o-mini"),
-        temperature=config.get("temperature", 0.7),
-    )
+    return Player(symbol=symbol, **{**_PLAYER_DEFAULTS, **config})

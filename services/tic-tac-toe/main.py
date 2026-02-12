@@ -2,20 +2,18 @@
 
 import asyncio
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
-import os
 
-# Load environment variables
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
     pass
 
-from game_manager import TicTacToeGameManager, ws_manager
+from game_manager import TicTacToeGameManager, player_info, ws_manager
 
 app = FastAPI(
     title="Tic-Tac-Toe API",
@@ -60,23 +58,6 @@ class GameConfig(BaseModel):
     enable_logging: bool = True
 
 
-@app.get("/")
-async def root():
-    """Root endpoint."""
-    return {
-        "message": "Tic-Tac-Toe API",
-        "endpoints": {
-            "POST /games": "Create a new game",
-            "GET /games/{game_id}": "Get game state",
-            "POST /games/{game_id}/move": "Make a move (random if no row/col provided)",
-            "POST /games/{game_id}/auto": "Play entire game automatically",
-            "POST /games/{game_id}/reset": "Reset a game",
-            "DELETE /games/{game_id}": "Delete a game",
-            "WS /ws/games/{game_id}": "WebSocket for real-time game updates",
-        },
-    }
-
-
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
@@ -107,14 +88,8 @@ async def create_game(config: Optional[GameConfig] = None):
         "game_id": game_id,
         "message": "Game created successfully",
         "state": state,
-        "player_x": {
-            "type": game.player_x.get_player_type(),
-            "model": game.player_x.get_model_name(),
-        },
-        "player_o": {
-            "type": game.player_o.get_player_type(),
-            "model": game.player_o.get_model_name(),
-        },
+        "player_x": player_info(game.player_x),
+        "player_o": player_info(game.player_o),
     }
 
 
@@ -207,41 +182,6 @@ async def get_logs():
     }
 
 
-@app.get("/schema/typescript")
-async def get_typescript_schema():
-    """Get TypeScript type definitions for the API."""
-    typescript_schema = """
-// Auto-generated TypeScript types from FastAPI backend
-// Last updated: {timestamp}
-
-export interface PlayerConfig {{
-  use_llm: boolean;
-  provider: 'openai' | 'mistral';
-  model: string;
-  temperature: number;
-}}
-
-export interface GameConfig {{
-  player_x?: PlayerConfig;
-  player_o?: PlayerConfig;
-  enable_logging: boolean;
-}}
-
-export interface MoveRequest {{
-  row?: number;
-  col?: number;
-}}
-
-// See /openapi.json for complete schema
-"""
-    from datetime import datetime
-
-    return {
-        "typescript": typescript_schema.format(timestamp=datetime.now().isoformat()),
-        "note": "For complete schema, use OpenAPI tools to generate from /openapi.json",
-    }
-
-
 @app.websocket("/ws/games/{game_id}")
 async def game_websocket(websocket: WebSocket, game_id: str):
     """WebSocket endpoint for real-time game updates.
@@ -259,22 +199,13 @@ async def game_websocket(websocket: WebSocket, game_id: str):
     await ws_manager.connect(game_id, websocket)
 
     try:
-        # Send current game state
         await websocket.send_json({
             "event_type": "connected",
             "data": {
                 "game_id": game_id,
                 "state": game.get_state(),
-                "player_x": {
-                    "type": game.player_x.get_player_type(),
-                    "model": game.player_x.get_model_name(),
-                    "name": game.player_x.name,
-                },
-                "player_o": {
-                    "type": game.player_o.get_player_type(),
-                    "model": game.player_o.get_model_name(),
-                    "name": game.player_o.name,
-                },
+                "player_x": player_info(game.player_x),
+                "player_o": player_info(game.player_o),
             },
         })
 
@@ -285,8 +216,6 @@ async def game_websocket(websocket: WebSocket, game_id: str):
         while True:
             await websocket.receive_text()
 
-    except WebSocketDisconnect:
-        ws_manager.disconnect(game_id, websocket)
     except Exception:
         ws_manager.disconnect(game_id, websocket)
 

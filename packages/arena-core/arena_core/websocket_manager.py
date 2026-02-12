@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 from datetime import datetime
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable
 
 from fastapi import WebSocket
 
@@ -22,9 +21,9 @@ class WebSocketManager:
     """
 
     def __init__(self):
-        self.active_connections: Dict[str, List[WebSocket]] = {}
-        self.event_queues: Dict[str, asyncio.Queue] = {}
-        self.event_buffers: Dict[str, List[tuple[str, Dict[str, Any]]]] = {}
+        self.active_connections: dict[str, list[WebSocket]] = {}
+        self.event_queues: dict[str, asyncio.Queue] = {}
+        self.event_buffers: dict[str, list[tuple[str, dict[str, Any]]]] = {}
 
     def create_game_queue(self, game_id: str) -> None:
         """Create an event queue and buffer for a new game."""
@@ -35,12 +34,9 @@ class WebSocketManager:
     async def connect(self, game_id: str, websocket: WebSocket) -> None:
         """Accept and register a WebSocket connection for a game."""
         await websocket.accept()
+        self.create_game_queue(game_id)
         if game_id not in self.active_connections:
             self.active_connections[game_id] = []
-            if game_id not in self.event_queues:
-                self.event_queues[game_id] = asyncio.Queue()
-            if game_id not in self.event_buffers:
-                self.event_buffers[game_id] = []
         self.active_connections[game_id].append(websocket)
         logger.info(
             f"WebSocket connected for game {game_id}. "
@@ -107,9 +103,8 @@ class WebSocketManager:
         if game_id not in self.event_buffers or not self.event_buffers[game_id]:
             return
         for event_type, data in self.event_buffers[game_id]:
-            message = json.dumps({"event_type": event_type, "data": data})
             try:
-                await websocket.send_text(message)
+                await websocket.send_json({"event_type": event_type, "data": data})
             except Exception:
                 pass
         # Clear buffer after first client receives them
@@ -126,7 +121,7 @@ class WebSocketManager:
         with the async WebSocket event loop.
         """
 
-        def callback(event_type: str, data: Dict[str, Any]) -> None:
+        def callback(event_type: str, data: dict[str, Any]) -> None:
             if game_id in self.event_queues:
                 try:
                     self.event_queues[game_id].put_nowait((event_type, data))

@@ -1,6 +1,3 @@
-// Custom React hook for Tic-Tac-Toe game state management
-// Uses WebSocket for real-time game updates (matching mr-white/codenames pattern)
-
 import { useState, useCallback, useRef, useEffect } from "react";
 import { TicTacToeApi, TicTacToeApiError } from "@/services/tictactoeApi";
 import type {
@@ -18,7 +15,7 @@ export interface MoveHistoryWithMetadata extends MoveHistoryEntry {
 export interface GameEvent {
   id: string;
   event_type: string;
-  data: any;
+  data: unknown;
   description: string;
   timestamp: number;
 }
@@ -86,9 +83,7 @@ export function useTicTacToe(): UseTicTacToeReturn {
     setIsPlaying(false);
   }, []);
 
-  // Connect WebSocket for real-time updates
   const connectWebSocket = useCallback((gId: string) => {
-    // Clean up existing connection
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
@@ -102,7 +97,6 @@ export function useTicTacToe(): UseTicTacToeReturn {
       onMessage: (data: any) => {
         const eventType = data.event_type || data.type || "unknown";
 
-        // Add to events log
         const event: GameEvent = {
           id: `${Date.now()}-${Math.random()}`,
           event_type: eventType,
@@ -116,7 +110,6 @@ export function useTicTacToe(): UseTicTacToeReturn {
 
         switch (eventType) {
           case "connected":
-            // Initial state from server
             if (payload.state) {
               setGameState(payload.state);
             }
@@ -129,7 +122,6 @@ export function useTicTacToe(): UseTicTacToeReturn {
             break;
 
           case "move_made":
-            // Update board and move history from WebSocket event
             if (payload.board) {
               setGameState((prev) => {
                 if (!prev) return prev;
@@ -199,9 +191,6 @@ export function useTicTacToe(): UseTicTacToeReturn {
     };
   }, []);
 
-  /**
-   * Create a new game with optional configuration
-   */
   const createGame = useCallback(async (config?: GameConfig) => {
     setLoading(true);
     setError(null);
@@ -214,7 +203,6 @@ export function useTicTacToe(): UseTicTacToeReturn {
       setPlayerOInfo(result.player_o);
       setMoveHistory([]);
 
-      // Connect WebSocket for real-time updates
       connectWebSocket(result.game_id);
     } catch (err) {
       const errorMessage = err instanceof TicTacToeApiError ? err.message : "Failed to create game";
@@ -225,10 +213,7 @@ export function useTicTacToe(): UseTicTacToeReturn {
     }
   }, [connectWebSocket]);
 
-  /**
-   * Make a single move via REST API
-   * Board updates come via WebSocket if connected
-   */
+  /** Make a single move via REST API. Board also updates via WebSocket if connected. */
   const makeMove = useCallback(
     async (row?: number, col?: number) => {
       if (!gameId) {
@@ -241,19 +226,16 @@ export function useTicTacToe(): UseTicTacToeReturn {
       try {
         const result = await TicTacToeApi.makeMove(gameId, { row, col });
 
-        // Update state from REST response (WebSocket will also send the update,
-        // but REST response is immediate for single moves)
-        setGameState({
+        setGameState((prev) => ({
           board: result.board,
           current_player: result.current_player || null,
           winner: result.winner || null,
           is_draw: result.is_draw || false,
           game_over: result.game_over,
-          move_history: gameState?.move_history || [],
+          move_history: prev?.move_history || [],
           available_moves: [],
-        });
+        }));
 
-        // Add to move history with metadata
         if (result.move) {
           setMoveHistory((prev) => [
             ...prev,
@@ -278,13 +260,10 @@ export function useTicTacToe(): UseTicTacToeReturn {
         setLoading(false);
       }
     },
-    [gameId, gameState]
+    [gameId]
   );
 
-  /**
-   * Play the game automatically via the backend auto endpoint.
-   * Updates come in real-time through WebSocket — no polling needed.
-   */
+  /** Trigger auto-play on the backend. Real-time updates arrive via WebSocket. */
   const playAuto = useCallback(async () => {
     if (!gameId) {
       setError("No active game");
@@ -296,16 +275,10 @@ export function useTicTacToe(): UseTicTacToeReturn {
     setLoading(true);
 
     try {
-      // Ensure WebSocket is connected before starting
       if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
         connectWebSocket(gameId);
       }
-
-      // Trigger auto-play on the backend — it runs the game and emits WS events
       await TicTacToeApi.autoPlay(gameId);
-      // The game is now running on the backend.
-      // WebSocket events (move_made, game_ended) will update the UI in real-time.
-      // isPlaying will be set to false when game_ended event arrives.
     } catch (err) {
       const errorMessage = err instanceof TicTacToeApiError ? err.message : "Failed to start auto-play";
       setError(errorMessage);
@@ -314,9 +287,6 @@ export function useTicTacToe(): UseTicTacToeReturn {
     }
   }, [gameId, connectWebSocket]);
 
-  /**
-   * Reset the current game to initial state
-   */
   const resetGame = useCallback(async () => {
     if (!gameId) {
       setError("No active game");
@@ -340,13 +310,9 @@ export function useTicTacToe(): UseTicTacToeReturn {
     }
   }, [gameId]);
 
-  /**
-   * Delete the current game
-   */
   const deleteGame = useCallback(async () => {
     if (!gameId) return;
 
-    // Close WebSocket
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;

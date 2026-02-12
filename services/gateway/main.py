@@ -58,15 +58,20 @@ async def shutdown():
 @app.get("/health")
 async def health():
     """Aggregate health check across all services."""
+    # Health paths differ per service: tic-tac-toe uses /health, others use root
+    HEALTH_PATHS = {"tic-tac-toe": "/health", "mr-white": "/api/v1/", "codenames": "/"}
     results = {}
-    for name, (url, rest_prefix, _ws_prefix) in ROUTE_MAP.items():
-        health_path = f"{rest_prefix}/health" if rest_prefix else "/health"
+    all_healthy = True
+    for name, (url, _rest_prefix, _ws_prefix) in ROUTE_MAP.items():
         try:
-            resp = await http_client.get(f"{url}{health_path}", timeout=5.0)
-            results[name] = resp.json() if resp.status_code == 200 else {"status": "unhealthy"}
+            resp = await http_client.get(f"{url}{HEALTH_PATHS[name]}", timeout=5.0)
+            results[name] = {"status": "healthy"} if resp.status_code == 200 else {"status": "unhealthy"}
+            if resp.status_code != 200:
+                all_healthy = False
         except Exception:
             results[name] = {"status": "unreachable"}
-    return {"status": "healthy", "services": results}
+            all_healthy = False
+    return {"status": "healthy" if all_healthy else "degraded", "services": results}
 
 
 # ─── Models endpoint ───────────────────────────────────────────────────────────

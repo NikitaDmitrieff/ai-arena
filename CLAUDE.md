@@ -50,3 +50,17 @@ docker-compose up
 - UI: pixel-art design system (cream backgrounds, 3px borders, hard shadows, Sora font)
 - All interactive elements use `pixel-btn`, `pixel-card`, `pixel-panel` classes
 - Framer Motion for all animations (fadeIn, stagger, whileHover)
+
+## Key Patterns
+- `arena-core` is installed via `pip install -e ../../packages/arena-core` (local editable) — backends import `from arena_core import ...`
+- Game managers extend `GameManager` base class from arena-core; game-specific logic stays in the service
+- Gateway routes: REST prefix and WS prefix differ per service (see `ROUTE_MAP` in `services/gateway/main.py`)
+- Frontend WebSocket hooks follow the pattern in `useTicTacToe.ts` / `useMrWhite.ts` / `useCodenames.ts`
+- Prefer `unknown` over `any` in TypeScript; use `asyncio.get_running_loop()` not `get_event_loop()` in Python
+- All borders must be 3px for pixel-art consistency — check scrollbars, code elements, connection indicators
+
+## Commands
+- `docker-compose up` — runs all 5 services (frontend:3000, gateway:8080, tic-tac-toe:8000, mr-white:8001, codenames:8002)
+- Frontend dev: `cd apps/frontend && npm run dev`
+- Backend dev: `cd services/{game} && pip install -e ../../packages/arena-core && uvicorn main:app --reload --port {port}`
+- Publish: repo is at https://github.com/NikitaDmitrieff/ai-arena

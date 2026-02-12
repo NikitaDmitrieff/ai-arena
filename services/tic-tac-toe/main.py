@@ -119,7 +119,9 @@ async def play_auto(game_id: str):
     if game is None:
         raise HTTPException(status_code=404, detail="Game not found")
 
-    # Start game in background so WebSocket clients get real-time updates
+    if hasattr(game, "_auto_task") and not game._auto_task.done():
+        raise HTTPException(status_code=409, detail="Auto-play already running")
+
     task = asyncio.create_task(manager.run_game(game_id))
     game._auto_task = task
 
@@ -149,6 +151,7 @@ async def delete_game(game_id: str):
     """Delete a game."""
     if not manager.delete_game(game_id):
         raise HTTPException(status_code=404, detail="Game not found")
+    ws_manager.cleanup_game(game_id)
     return {"game_id": game_id, "message": "Game deleted successfully"}
 
 

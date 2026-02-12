@@ -203,7 +203,7 @@ export default function MrWhitePage() {
                         fontFamily: "monospace",
                       }}
                     >
-                      {process.env["NEXT_PUBLIC_MRWHITE_API_URL"] || "http://localhost:8001"}
+                      {(process.env["NEXT_PUBLIC_API_URL"] || "http://localhost:8080") + "/api/mr-white"}
                     </code>
                   </span>
                 </div>

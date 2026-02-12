@@ -80,7 +80,7 @@ export default function CodenamesPage() {
                   fontFamily: "monospace",
                 }}
               >
-                {process.env["NEXT_PUBLIC_CODENAMES_API_URL"] || "http://localhost:8002"}
+                {(process.env["NEXT_PUBLIC_API_URL"] || "http://localhost:8080") + "/api/codenames"}
               </code>
             </span>
           </div>

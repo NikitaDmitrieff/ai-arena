@@ -205,13 +205,13 @@ export default function TicTacToePage() {
                     fontFamily: "monospace",
                   }}
                 >
-                  {process.env["NEXT_PUBLIC_TICTACTOE_API_URL"] || "http://localhost:8000"}
+                  {(process.env["NEXT_PUBLIC_API_URL"] || "http://localhost:8080") + "/api/tic-tac-toe"}
                 </code>
               </span>
             </div>
             <a
               href={
-                (process.env["NEXT_PUBLIC_TICTACTOE_API_URL"] || "http://localhost:8000") + "/docs"
+                (process.env["NEXT_PUBLIC_API_URL"] || "http://localhost:8080") + "/api/tic-tac-toe/docs"
               }
               target="_blank"
               rel="noopener noreferrer"

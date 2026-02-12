@@ -2,7 +2,8 @@
 
 import { GameStartRequest, GameStatus, GameStateResponse, ModelInfo } from "@/lib/types/codenames";
 
-const API_BASE_URL = process.env["NEXT_PUBLIC_CODENAMES_API_URL"] || "http://localhost:8002";
+const API_URL = process.env["NEXT_PUBLIC_API_URL"] || "http://localhost:8080";
+const API_BASE_URL = `${API_URL}/api/codenames`;
 
 export class CodenamesApiError extends Error {
   constructor(
@@ -27,7 +28,7 @@ export class CodenamesApi {
    */
   async getModels(): Promise<ModelInfo[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/models`, {
+      const response = await fetch(`${this.baseUrl}/models`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -52,7 +53,7 @@ export class CodenamesApi {
    */
   async createGame(config: GameStartRequest): Promise<GameStatus> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/games`, {
+      const response = await fetch(`${this.baseUrl}/games`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -83,7 +84,7 @@ export class CodenamesApi {
    */
   async listGames(): Promise<string[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/games`, {
+      const response = await fetch(`${this.baseUrl}/games`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -108,7 +109,7 @@ export class CodenamesApi {
    */
   async getGame(gameId: string): Promise<GameStateResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/games/${gameId}`, {
+      const response = await fetch(`${this.baseUrl}/games/${gameId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -136,7 +137,7 @@ export class CodenamesApi {
    */
   async deleteGame(gameId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/games/${gameId}`, {
+      const response = await fetch(`${this.baseUrl}/games/${gameId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -161,8 +162,8 @@ export class CodenamesApi {
    * Get WebSocket URL for a game
    */
   getWebSocketUrl(gameId: string): string {
-    const wsBaseUrl = this.baseUrl.replace("http://", "ws://").replace("https://", "wss://");
-    return `${wsBaseUrl}/ws/games/${gameId}`;
+    const wsBaseUrl = API_URL.replace("http://", "ws://").replace("https://", "wss://");
+    return `${wsBaseUrl}/ws/codenames/games/${gameId}`;
   }
 
   /**
@@ -170,7 +171,8 @@ export class CodenamesApi {
    */
   async healthCheck(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/`, {
+      const apiUrl = process.env["NEXT_PUBLIC_API_URL"] || "http://localhost:8080";
+      const response = await fetch(`${apiUrl}/health`, {
         method: "GET",
       });
       return response.ok;

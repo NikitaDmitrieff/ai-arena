@@ -23,8 +23,9 @@ class MrWhiteApiService {
   private wsUrl: string;
 
   constructor() {
-    this.baseUrl = process.env["NEXT_PUBLIC_MRWHITE_API_URL"] || "http://localhost:8001";
-    this.wsUrl = process.env["NEXT_PUBLIC_MRWHITE_WS_URL"] || "ws://localhost:8001";
+    const apiUrl = process.env["NEXT_PUBLIC_API_URL"] || "http://localhost:8080";
+    this.baseUrl = `${apiUrl}/api/mr-white`;
+    this.wsUrl = apiUrl.replace("http://", "ws://").replace("https://", "wss://");
   }
 
   // Helper method for fetch requests
@@ -60,12 +61,12 @@ class MrWhiteApiService {
 
   // Health check
   async healthCheck(): Promise<HealthResponse> {
-    return this.fetchApi<HealthResponse>("/api/v1/health");
+    return this.fetchApi<HealthResponse>("/health");
   }
 
   // Create a new game
   async createGame(config: CreateGameRequest): Promise<GameResponse> {
-    return this.fetchApi<GameResponse>("/api/v1/games", {
+    return this.fetchApi<GameResponse>("/games", {
       method: "POST",
       body: JSON.stringify(config),
     });
@@ -73,12 +74,12 @@ class MrWhiteApiService {
 
   // Get game status
   async getGame(gameId: string): Promise<GameResponse> {
-    return this.fetchApi<GameResponse>(`/api/v1/games/${gameId}`);
+    return this.fetchApi<GameResponse>(`/games/${gameId}`);
   }
 
   // List all games
   async listGames(): Promise<GameListResponse> {
-    return this.fetchApi<GameListResponse>("/api/v1/games");
+    return this.fetchApi<GameListResponse>("/games");
   }
 
   // Create WebSocket connection
@@ -91,7 +92,7 @@ class MrWhiteApiService {
       onClose?: () => void;
     }
   ): WebSocket {
-    const ws = new WebSocket(`${this.wsUrl}/api/v1/games/${gameId}/ws`);
+    const ws = new WebSocket(`${this.wsUrl}/ws/mr-white/games/${gameId}/ws`);
 
     ws.onopen = () => {
       console.log(`WebSocket connected to game ${gameId}`);

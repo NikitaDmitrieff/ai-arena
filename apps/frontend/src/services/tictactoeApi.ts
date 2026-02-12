@@ -11,7 +11,9 @@ import type {
   DeleteGameResponse,
 } from "@/lib/types/tictactoe";
 
-const API_BASE_URL = process.env["NEXT_PUBLIC_TICTACTOE_API_URL"] || "http://localhost:8000";
+const API_URL = process.env["NEXT_PUBLIC_API_URL"] || "http://localhost:8080";
+const API_BASE_URL = `${API_URL}/api/tic-tac-toe`;
+const WS_BASE_URL = API_URL.replace("http://", "ws://").replace("https://", "wss://");
 
 // Custom error class for API errors
 export class TicTacToeApiError extends Error {
@@ -124,5 +126,50 @@ export class TicTacToeApi {
       method: "POST",
     });
     return handleResponse(response);
+  }
+
+  /**
+   * Get WebSocket URL for a game (real-time events)
+   */
+  static getWebSocketUrl(gameId: string): string {
+    return `${WS_BASE_URL}/ws/tic-tac-toe/games/${gameId}`;
+  }
+
+  /**
+   * Create WebSocket connection for real-time game events
+   */
+  static createWebSocket(
+    gameId: string,
+    callbacks: {
+      onOpen?: () => void;
+      onMessage?: (event: any) => void;
+      onError?: (error: Event) => void;
+      onClose?: () => void;
+    }
+  ): WebSocket {
+    const ws = new WebSocket(TicTacToeApi.getWebSocketUrl(gameId));
+
+    ws.onopen = () => {
+      callbacks.onOpen?.();
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        callbacks.onMessage?.(data);
+      } catch (error) {
+        console.error("Failed to parse WebSocket message:", error);
+      }
+    };
+
+    ws.onerror = (error) => {
+      callbacks.onError?.(error);
+    };
+
+    ws.onclose = () => {
+      callbacks.onClose?.();
+    };
+
+    return ws;
   }
 }

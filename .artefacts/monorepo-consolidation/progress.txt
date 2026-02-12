@@ -26,4 +26,13 @@ COMPLETED TASKS:
   - Fixed missing pixel-btn base class on dismiss/API docs buttons
   - Added pulse animation to Mr. White connection indicator
 
-NEXT TASK: Task 13 — Create Unified Docker Compose
+- Task 13: Create Unified Docker Compose — Done (commit 9d5090b)
+  Summary: Created root docker-compose.yml with 5 services (frontend, gateway,
+  tic-tac-toe, mr-white, codenames) on arena-network. Updated all Dockerfiles
+  to use root build context and install arena-core from local packages/.
+  Added health checks to all services. Created root .env.example with API keys.
+  Created root .dockerignore. Removed arena-core from service dependency files
+  (installed separately in Dockerfiles). Game services internal-only; only
+  frontend (3000) and gateway (8080) exposed.
+
+NEXT TASK: Task 14 — Visual Audit via Chrome MCP

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 
 interface GameControlsProps {
   hasGame: boolean;
@@ -8,7 +8,7 @@ interface GameControlsProps {
   loading: boolean;
   isPlaying: boolean;
   onMakeMove: () => void;
-  onPlayAuto: (delayMs: number) => void;
+  onPlayAuto: () => void;
   onReset: () => void;
   onNewGame: () => void;
   onStopAutoPlay: () => void;
@@ -16,7 +16,7 @@ interface GameControlsProps {
 
 /**
  * Control buttons for game actions
- * Make move, auto-play, reset, new game, etc.
+ * Auto-play is now WebSocket-driven (no delay selector needed)
  */
 export default function GameControls({
   hasGame,
@@ -29,12 +29,6 @@ export default function GameControls({
   onNewGame,
   onStopAutoPlay,
 }: GameControlsProps) {
-  const [moveDelay, setMoveDelay] = useState(1000);
-
-  const handlePlayAuto = () => {
-    onPlayAuto(moveDelay);
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3 justify-center">
@@ -50,7 +44,7 @@ export default function GameControls({
         {/* Auto Play / Stop */}
         {!isPlaying ? (
           <button
-            onClick={handlePlayAuto}
+            onClick={onPlayAuto}
             disabled={!hasGame || gameOver || loading}
             className="pixel-btn pixel-btn-success"
           >
@@ -80,29 +74,6 @@ export default function GameControls({
           ⚙️ New Config
         </button>
       </div>
-
-      {/* Delay Control */}
-      {hasGame && !gameOver && (
-        <div className="flex items-center justify-center gap-3 text-sm">
-          <label htmlFor="moveDelay" className="pixel-text">
-            ⏱️ Move Delay:
-          </label>
-          <select
-            id="moveDelay"
-            value={moveDelay}
-            onChange={(e) => setMoveDelay(Number(e.target.value))}
-            disabled={isPlaying}
-            className="pixel-select"
-            style={{ width: "auto" }}
-          >
-            <option value={500}>0.5s (Fast)</option>
-            <option value={1000}>1s (Normal)</option>
-            <option value={1500}>1.5s</option>
-            <option value={2000}>2s</option>
-            <option value={3000}>3s (Slow)</option>
-          </select>
-        </div>
-      )}
     </div>
   );
 }

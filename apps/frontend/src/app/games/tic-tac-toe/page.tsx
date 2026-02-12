@@ -25,6 +25,7 @@ export default function TicTacToePage() {
     loading,
     error,
     isPlaying,
+    isConnected,
     createGame,
     makeMove,
     playAuto,
@@ -59,9 +60,9 @@ export default function TicTacToePage() {
     }
   };
 
-  const handlePlayAuto = async (delayMs: number) => {
+  const handlePlayAuto = async () => {
     try {
-      await playAuto(delayMs);
+      await playAuto();
     } catch (err) {
       console.error("Failed during auto-play:", err);
     }
@@ -84,7 +85,7 @@ export default function TicTacToePage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center space-y-4"
         >
-          <h1 className="pixel-heading pixel-heading-xl">🎮 Tic-Tac-Toe Arena</h1>
+          <h1 className="pixel-heading pixel-heading-xl">Tic-Tac-Toe Arena</h1>
           <p className="pixel-text" style={{ fontSize: "18px" }}>
             Watch LLMs battle it out in classic tic-tac-toe, or play yourself!
           </p>
@@ -132,6 +133,24 @@ export default function TicTacToePage() {
         {/* Game Area */}
         {!showConfig && gameState && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            {/* Connection Status */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center justify-center gap-2"
+            >
+              <span
+                className="h-3 w-3 pixel-border"
+                style={{
+                  background: isConnected ? "#A8E6CF" : "#FF6B6B",
+                  animation: isConnected ? "pulse 2s infinite" : "none",
+                }}
+              />
+              <span className="pixel-text text-sm">
+                {isConnected ? "Live — WebSocket connected" : "Disconnected"}
+              </span>
+            </motion.div>
+
             {/* Game Controls */}
             <GameControls
               hasGame={!!gameId}
@@ -146,6 +165,19 @@ export default function TicTacToePage() {
             />
 
             {/* Loading Indicator */}
+            {loading && isPlaying && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-4"
+              >
+                <div className="pixel-panel-info inline-flex items-center gap-3 px-6 py-3">
+                  <div className="pixel-spinner" />
+                  <span className="pixel-text">Auto-playing — waiting for moves via WebSocket...</span>
+                </div>
+              </motion.div>
+            )}
+
             {loading && !isPlaying && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -236,8 +268,8 @@ export default function TicTacToePage() {
           </div>
           <div className="pixel-card text-center">
             <div className="text-3xl mb-2">⚡</div>
-            <h3 className="pixel-heading pixel-heading-sm">Real-Time Moves</h3>
-            <p className="text-sm pixel-text mt-1">See each move as it happens</p>
+            <h3 className="pixel-heading pixel-heading-sm">Real-Time WebSocket</h3>
+            <p className="text-sm pixel-text mt-1">Live updates as each move happens</p>
           </div>
           <div className="pixel-card text-center">
             <div className="text-3xl mb-2">💭</div>

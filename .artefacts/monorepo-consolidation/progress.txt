@@ -18,4 +18,12 @@ COMPLETED TASKS:
   All mrwhite-* component classes removed; now uses pixel-* classes from shared
   design system. Canvas component (MrWhiteCanvas) kept intact.
 
-NEXT TASK: Task 11 — Fix Shared UI Components (Button.tsx, StartRandomButton.tsx, Header.tsx)
+- Task 11: Fix Shared UI Components — Done (commit a5be369)
+  Summary: Refactored Button.tsx to use pixel-btn CSS classes as base (primary,
+  danger, warning, soft variants mapped to pixel-btn-* modifiers). Added size
+  prop (sm/md/lg) mapping to pixel-btn-sm/pixel-btn-lg. Updated StartRandomButton
+  to use pixel-btn pixel-btn-lg. Updated Header "Play now" button to use pixel-btn
+  pixel-btn-sm. Header container now uses pixel-border-lg for consistent pixel-art
+  styling. Fixed test that referenced non-existent "ghost" variant.
+
+NEXT TASK: Task 12 — Animation and Polish Consistency Pass

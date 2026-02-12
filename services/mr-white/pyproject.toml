@@ -15,5 +15,5 @@ dependencies = [
   "websockets>=13.0",
   "httpx>=0.27.0",
   "requests>=2.32.0",
-  "arena-core",
+  # arena-core is installed separately (pip install -e packages/arena-core)
 ]

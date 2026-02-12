@@ -1,0 +1,38 @@
+# Git
+.git
+.gitignore
+
+# Node
+**/node_modules
+**/.next
+
+# Python
+**/__pycache__
+**/.venv
+**/*.pyc
+**/*.egg-info
+
+# IDE
+**/.vscode
+**/.idea
+
+# Environment
+.env
+**/.env
+
+# Documentation and metadata
+.prodman
+.artefacts
+**/.docs
+**/.github
+**/README.md
+**/DEPLOYMENT.md
+**/CLAUDE.md
+**/docker-compose.yml
+**/*.md
+
+# Logs
+**/logs
+
+# OS
+**/.DS_Store

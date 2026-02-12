@@ -1,0 +1,78 @@
+version: "3.8"
+
+services:
+  # ─── Frontend ────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      gateway:
+        condition: service_healthy
+    networks:
+      - arena-network
+    restart: unless-stopped
+
+  # ─── API Gateway ─────────────────────────────────────────────────────────────
+  gateway:
+    build:
+      context: .
+      dockerfile: services/gateway/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - TIC_TAC_TOE_URL=http://tic-tac-toe:8000
+      - MR_WHITE_URL=http://mr-white:8001
+      - CODENAMES_URL=http://codenames:8002
+    depends_on:
+      tic-tac-toe:
+        condition: service_healthy
+      mr-white:
+        condition: service_healthy
+      codenames:
+        condition: service_healthy
+    networks:
+      - arena-network
+    restart: unless-stopped
+
+  # ─── Game Services ───────────────────────────────────────────────────────────
+  tic-tac-toe:
+    build:
+      context: .
+      dockerfile: services/tic-tac-toe/Dockerfile
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY:-}
+    networks:
+      - arena-network
+    restart: unless-stopped
+
+  mr-white:
+    build:
+      context: .
+      dockerfile: services/mr-white/Dockerfile
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY:-}
+    networks:
+      - arena-network
+    restart: unless-stopped
+
+  codenames:
+    build:
+      context: .
+      dockerfile: services/codenames/Dockerfile
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY:-}
+    networks:
+      - arena-network
+    restart: unless-stopped
+
+networks:
+  arena-network:
+    driver: bridge

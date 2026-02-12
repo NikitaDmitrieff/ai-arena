@@ -5,5 +5,5 @@ uvicorn>=0.32.0
 websockets>=13.0
 pydantic>=2.0.0
 python-dotenv>=1.0.0
-arena-core
+# arena-core is installed separately (pip install -e packages/arena-core)
 

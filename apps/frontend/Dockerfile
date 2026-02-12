@@ -5,7 +5,7 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json ./
+COPY apps/frontend/package.json apps/frontend/package-lock.json ./
 
 # Install dependencies
 RUN npm ci
@@ -18,7 +18,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 
 # Copy application files
-COPY . .
+COPY apps/frontend/ .
 
 # Build arguments for environment variables
 ARG NEXT_PUBLIC_API_URL
@@ -58,6 +58,10 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
 # Start the application
 CMD ["node", "server.js"]

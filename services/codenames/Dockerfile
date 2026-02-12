@@ -7,16 +7,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+# Copy and install arena-core first for better caching
+COPY packages/arena-core /app/packages/arena-core
+RUN pip install --no-cache-dir -e /app/packages/arena-core
+
+# Copy requirements and install remaining dependencies
+COPY services/codenames/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY src/ ./src/
-COPY api/ ./api/
-COPY words.txt .
-COPY simulation_config.json .
-COPY run_api.py .
+COPY services/codenames/src/ ./src/
+COPY services/codenames/api/ ./api/
+COPY services/codenames/words.txt .
+COPY services/codenames/simulation_config.json .
+COPY services/codenames/run_api.py .
 
 # Expose port
 EXPOSE 8002

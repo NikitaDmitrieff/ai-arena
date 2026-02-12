@@ -8,18 +8,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency files first for better caching
-COPY pyproject.toml .
-COPY uv.lock* ./
+# Copy and install arena-core first for better caching
+COPY packages/arena-core /app/packages/arena-core
+RUN pip install --no-cache-dir -e /app/packages/arena-core
 
-# Install dependencies using pip (or uv if preferred)
+# Copy dependency files first for better caching
+COPY services/mr-white/pyproject.toml .
+COPY services/mr-white/uv.lock* ./
+
+# Install dependencies using pip
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir .
 
 # Copy application code
-COPY src/ ./src/
-COPY api/ ./api/
-COPY main.py .
+COPY services/mr-white/src/ ./src/
+COPY services/mr-white/api/ ./api/
+COPY services/mr-white/main.py .
 
 # Expose port
 EXPOSE 8001

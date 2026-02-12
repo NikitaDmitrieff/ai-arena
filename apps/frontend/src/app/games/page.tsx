@@ -32,7 +32,7 @@ export default async function GamesPage() {
         </p>
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {GAMES.map((g) => (
           <GameCard key={g.id} {...g} />
         ))}

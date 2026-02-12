@@ -28,24 +28,6 @@ export function EventLog({ events, maxHeight = "400px" }: EventLogProps) {
     }
   };
 
-  const getEventColor = (eventType: string): string => {
-    switch (eventType) {
-      case "game_started":
-        return "border-l-green-500";
-      case "turn_started":
-        return "border-l-blue-500";
-      case "clue_given":
-        return "border-l-yellow-500";
-      case "guess_made":
-        return "border-l-purple-500";
-      case "turn_ended":
-        return "border-l-orange-500";
-      case "game_ended":
-        return "border-l-red-500";
-      default:
-        return "border-l-gray-500";
-    }
-  };
 
   if (events.length === 0) {
     return (
@@ -119,11 +101,11 @@ export function EventLog({ events, maxHeight = "400px" }: EventLogProps) {
         }
         .custom-scrollbar::-webkit-scrollbar-track {
           background: #f1f1f1;
-          border: 2px solid #000;
+          border: 3px solid #000;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
           background: #4ecdc4;
-          border: 2px solid #000;
+          border: 3px solid #000;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: #3fbdb4;

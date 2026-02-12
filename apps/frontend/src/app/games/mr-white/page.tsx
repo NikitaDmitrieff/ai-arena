@@ -125,14 +125,8 @@ export default function MrWhitePage() {
               <div className="mt-6 pixel-panel-info">
                 <div className="flex items-center justify-center gap-2 text-sm pixel-text">
                   <span
-                    className="animate-pulse"
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      background: "#A8E6CF",
-                      border: "2px solid #000",
-                      display: "inline-block",
-                    }}
+                    className="h-3 w-3 pixel-border animate-pulse"
+                    style={{ background: "#A8E6CF", display: "inline-block" }}
                   />
                   <span>
                     Connected to backend:{" "}
@@ -141,7 +135,7 @@ export default function MrWhitePage() {
                         fontSize: "11px",
                         background: "white",
                         padding: "2px 6px",
-                        border: "2px solid #000",
+                        border: "3px solid #000",
                         fontFamily: "monospace",
                       }}
                     >
@@ -232,14 +226,8 @@ export default function MrWhitePage() {
                           }}
                         >
                           <span
-                            style={{
-                              width: "8px",
-                              height: "8px",
-                              border: "2px solid #000",
-                              background: isConnected ? "#A8E6CF" : "#FF6B6B",
-                              display: "inline-block",
-                            }}
-                            className={isConnected ? "animate-pulse" : ""}
+                            className={`h-3 w-3 pixel-border ${isConnected ? "animate-pulse" : ""}`}
+                            style={{ background: isConnected ? "#A8E6CF" : "#FF6B6B", display: "inline-block" }}
                           />
                           {isConnected ? "Yes" : "No"}
                           {!isConnected && (

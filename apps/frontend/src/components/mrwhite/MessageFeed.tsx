@@ -93,11 +93,11 @@ export function MessageFeed({ messages }: MessageFeedProps) {
         }
         .pixel-scrollbar::-webkit-scrollbar-track {
           background: #f1f1f1;
-          border: 2px solid #000;
+          border: 3px solid #000;
         }
         .pixel-scrollbar::-webkit-scrollbar-thumb {
           background: #4ecdc4;
-          border: 2px solid #000;
+          border: 3px solid #000;
         }
         .pixel-scrollbar::-webkit-scrollbar-thumb:hover {
           background: #3fbdb4;

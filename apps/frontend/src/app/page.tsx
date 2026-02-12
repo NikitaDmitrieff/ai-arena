@@ -1,6 +1,6 @@
 import StartRandomButton from "@/components/ui/StartRandomButton";
 
-const GAMES = ["tic-tac-toe", "mr-white"];
+const GAMES = ["tic-tac-toe", "mr-white", "codenames"];
 
 export default async function Page() {
   return (

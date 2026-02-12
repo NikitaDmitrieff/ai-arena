@@ -48,15 +48,10 @@ export function GameInfo({
       {/* Connection Status */}
       <div className="flex items-center justify-between px-4 py-2 pixel-panel-info">
         <div className="flex items-center gap-3">
-          <div
-            style={{
-              width: "8px",
-              height: "8px",
-              border: "2px solid #000",
-              background: isConnected ? "#A8E6CF" : "#FF6B6B",
-            }}
-            className={isConnected ? "animate-pulse" : ""}
-          ></div>
+          <span
+            className={`h-3 w-3 pixel-border ${isConnected ? "animate-pulse" : ""}`}
+            style={{ background: isConnected ? "#A8E6CF" : "#FF6B6B" }}
+          />
           <span className="text-sm pixel-text">{isConnected ? "Connected" : "Disconnected"}</span>
           {!isConnected && gameId && (
             <button

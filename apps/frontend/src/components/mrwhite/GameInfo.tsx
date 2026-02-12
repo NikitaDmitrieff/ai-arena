@@ -40,14 +40,9 @@ export function GameInfo({ game, isConnected }: GameInfoProps) {
 
           {/* Connection Indicator */}
           <div className="flex items-center gap-2">
-            <div
-              style={{
-                width: "8px",
-                height: "8px",
-                border: "2px solid #000",
-                background: isConnected ? "#A8E6CF" : "#FF6B6B",
-              }}
-              className={isConnected ? "animate-pulse" : ""}
+            <span
+              className={`h-3 w-3 pixel-border ${isConnected ? "animate-pulse" : ""}`}
+              style={{ background: isConnected ? "#A8E6CF" : "#FF6B6B" }}
             />
             <span className="text-sm pixel-text">
               {isConnected ? "Live" : "Disconnected"}

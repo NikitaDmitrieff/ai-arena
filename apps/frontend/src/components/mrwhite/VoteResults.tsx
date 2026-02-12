@@ -50,7 +50,7 @@ export function VoteResults({ voteCount, eliminatedPlayer }: VoteResultsProps) {
                   width: "100%",
                   height: "12px",
                   background: "#f9f9f9",
-                  border: "2px solid #000",
+                  border: "3px solid #000",
                 }}
               >
                 <motion.div

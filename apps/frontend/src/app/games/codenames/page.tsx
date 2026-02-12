@@ -76,7 +76,7 @@ export default function CodenamesPage() {
                   fontSize: "11px",
                   background: "white",
                   padding: "2px 6px",
-                  border: "2px solid #000",
+                  border: "3px solid #000",
                   fontFamily: "monospace",
                 }}
               >

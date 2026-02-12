@@ -27,5 +27,60 @@
 - Game-specific logic (game.py, board.py, player.py, prompts.py) untouched
 - No issues encountered
 
+**Task 4: Refactor Mr. White Backend to Use Shared Core** - DONE
+- Replaced custom WebSocketManager with arena-core import (api/websocket_manager.py)
+- Renamed GameManager → MrWhiteGameManager extending arena-core base GameManager
+- Renamed GameState → MrWhiteGameState (mr-white-specific)
+- Updated api/models.py to use GameStatus from arena-core instead of local enum
+- Updated api/routes.py: removed await from sync get_game/list_games calls
+- Added arena-core dependency to pyproject.toml
+- All mr-white-specific game execution logic preserved
+- Commit: aaf3148
+
+**Task 5: Refactor Codenames Backend to Use Shared Core** - DONE
+- Replaced custom WebSocketManager (137 lines) with arena-core re-export (6 lines)
+- Renamed GameManager → CodenamesGameManager extending arena-core base GameManager
+- Updated app.py: imports CodenamesGameManager, uses ws_manager from arena-core
+- create_game is now async (matching base class signature), call site uses await
+- Changed emit_event → send_event to match arena-core API
+- Added arena-core dependency to requirements.txt and pyproject.toml
+- All codenames-specific game logic preserved (word loading, agent configs, match execution)
+- No issues encountered
+- Commit: f367637
+
+**Task 6: Add WebSocket Support to Tic-Tac-Toe Backend** - DONE
+- Added WebSocket endpoint at /ws/games/{game_id} in main.py
+- Imported WebSocketManager from arena-core in game_manager.py
+- run_game() now emits game_started, move_made, game_ended events via event queue/callback pattern
+- Auto-play endpoint runs game in background for real-time WS delivery
+- Added websockets>=12.0 to requirements.txt
+- All existing REST endpoints remain backward compatible
+- Commit: 8ec254c
+
+**Task 7: Create Unified API Gateway** - DONE
+- Created services/gateway/main.py: FastAPI reverse proxy with httpx for REST and websockets for WS
+- REST routing: /api/{service}/* proxied to appropriate backend with path prefix mapping
+- WebSocket routing: /ws/{service}/* proxied to backend WS endpoints
+- Aggregate /health endpoint checks all three game services
+- /api/models proxied to codenames (shared LLM providers)
+- CORS enabled for frontend
+- Created requirements.txt (fastapi, uvicorn, httpx, websockets, python-dotenv)
+- Created Dockerfile (Python 3.12 slim, uvicorn on port 8080)
+- Service URL mapping handles mr-white /api/v1 prefix and codenames /api prefix
+- No issues encountered
+- Commit: 260fd00
+
+**Task 8: Refactor Frontend API Clients to Use Gateway** - DONE
+- Replaced 3 separate env vars with single NEXT_PUBLIC_API_URL (gateway at port 8080)
+- tictactoeApi.ts: base URL → /api/tic-tac-toe, added WebSocket client (getWebSocketUrl, createWebSocket)
+- mrwhiteApi.ts: base URL → /api/mr-white, WS URL → /ws/mr-white/games/{id}/ws, dropped /api/v1 prefix from paths
+- codenamesApi.ts: base URL → /api/codenames, WS URL → /ws/codenames/games/{id}, dropped /api prefix from paths
+- Updated page.tsx files (tic-tac-toe, mr-white, codenames) to show gateway URLs
+- Simplified Dockerfile: single NEXT_PUBLIC_API_URL ARG/ENV
+- Simplified next.config.js: single env var
+- Created apps/frontend/.env.example with gateway URL
+- No issues encountered
+- Commit: b0ba1e4
+
 ### Next Task
-Task 4: Refactor Mr. White Backend to Use Shared Core
+Task 9: Update Tic-Tac-Toe Frontend for WebSocket Support

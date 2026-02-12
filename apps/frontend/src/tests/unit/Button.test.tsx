@@ -8,8 +8,8 @@ describe('Button', () => {
     expect(screen.getByText('Click me')).toBeInTheDocument();
   });
 
-  it('supports variant ghost', () => {
-    render(<Button variant="ghost">Ghost</Button>);
-    expect(screen.getByText('Ghost')).toBeInTheDocument();
+  it('supports variant soft', () => {
+    render(<Button variant="soft">Soft</Button>);
+    expect(screen.getByText('Soft')).toBeInTheDocument();
   });
 });

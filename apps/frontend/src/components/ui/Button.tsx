@@ -5,27 +5,41 @@ import { clsx } from "clsx";
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "danger" | "warning" | "soft";
+  size?: "sm" | "md" | "lg";
   icon?: React.ReactNode;
 };
 
 export default function Button({
   variant = "primary",
+  size = "md",
   icon,
   className,
   children,
   ...props
 }: ButtonProps) {
-  const base =
-    "btn-reset inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold font-sora transition-all duration-200 ease-in-out disabled:opacity-50 disabled:pointer-events-none border-3 border-black shadow-hard hover:shadow-hard-lg hover:-translate-x-0.5 hover:-translate-y-0.5 active:shadow-hard-active active:translate-x-0.5 active:translate-y-0.5";
   const variants = {
-    primary: "bg-pixel-teal text-black hover:bg-accent-hover",
-    danger: "bg-pixel-red text-black hover:bg-[#FF5252]",
-    warning: "bg-pixel-yellow text-black hover:bg-[#FFC700]",
-    soft: "bg-white text-black hover:bg-neutral-50",
+    primary: "pixel-btn",
+    danger: "pixel-btn pixel-btn-danger",
+    warning: "pixel-btn pixel-btn-warning",
+    soft: "pixel-btn pixel-btn-secondary",
+  } as const;
+
+  const sizes = {
+    sm: "pixel-btn-sm",
+    md: "",
+    lg: "pixel-btn-lg",
   } as const;
 
   return (
-    <button className={clsx(base, variants[variant], className)} {...props}>
+    <button
+      className={clsx(
+        variants[variant],
+        sizes[size],
+        "inline-flex items-center gap-2",
+        className
+      )}
+      {...props}
+    >
       {icon}
       <span>{children}</span>
     </button>

@@ -18,7 +18,7 @@ export default function Header() {
 
   return (
     <header className="mb-8">
-      <div className="container-padded h-20 flex items-center justify-between bg-white border-4 border-black shadow-hard">
+      <div className="container-padded h-20 flex items-center justify-between bg-white pixel-border-lg shadow-hard">
         <Link href="/" aria-label="LLM Arena Home" className="flex items-center gap-3">
           <Image
             src="/assets/llm-logo.png"
@@ -34,7 +34,7 @@ export default function Header() {
           <NavLink href="/history">History</NavLink>
           <button
             onClick={handlePlayNowClick}
-            className="btn-reset ml-4 px-5 py-2.5 text-sm font-bold font-sora text-black bg-pixel-teal border-3 border-black shadow-hard hover:shadow-hard-lg hover:-translate-x-0.5 hover:-translate-y-0.5 active:shadow-hard-active active:translate-x-0.5 active:translate-y-0.5 transition-all duration-200 ease-in-out hover:bg-accent-hover hidden sm:inline-block"
+            className="pixel-btn pixel-btn-sm ml-4 hidden sm:inline-block"
           >
             Play now
           </button>
